@@ -1,0 +1,31 @@
+<html>
+
+<body>
+<script src="//cdn.jsdelivr.net/pouchdb/2.2.3/pouchdb.min.js"></script> <!-- TODO: how to properly reference pouchdb.js?? -->
+<script src="../../dist/pouchdb.delta-pouch.js"></script>
+<script>
+
+  var db = new PouchDB('pages');
+
+  function first(obj) {
+    for (var i in obj) {
+      return obj[i];
+    }
+  }
+
+  db.all().then(function (docs) {
+    if (docs) { // existing page?
+      // console.log(docs);
+      var page = first(docs);
+      // set $id for existing doc & only update views
+      db.save({ $id: page.$id, views: page.views + 1 });
+    } else { // new page?
+      db.save({ url: 'google.com', views: 0 });
+    }
+  });
+
+</script>
+
+</body>
+
+</html>

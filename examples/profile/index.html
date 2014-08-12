@@ -1,0 +1,84 @@
+<html>
+
+<body>
+<script src="//cdn.jsdelivr.net/pouchdb/2.2.3/pouchdb.min.js"></script> <!-- TODO: how to properly reference pouchdb.js?? -->
+<script src="../../dist/pouchdb.delta-pouch.js"></script>
+<script>
+
+  var profile = {}, db = new PouchDB('profiles'),
+      remoteCouch = (location.search ? 'https://delta-pouch.iriscouch.com'
+        : 'http://127.0.0.1:5984') + '/profiles';
+
+  function first(obj) {
+    for (var i in obj) {
+      return obj[i];
+    }
+  }
+
+  function display() {
+    document.getElementById('profile-text').innerHTML =
+      JSON.stringify({ name: profile.name, age: profile.age, location: profile.location });
+  }
+
+  function onChange(doc) {
+    profile = db.merge(profile, doc);
+    display();
+  }
+
+  function save() {
+    var updates = {};
+    if (profile.$id) { // exists?
+      updates.$id = profile.$id;
+    }
+    updates[document.getElementById('attr').value] = document.getElementById('value').value;
+    db.save(updates).then(function (doc) {
+      updates = db.merge(updates, doc);
+      onChange(updates);
+    });
+    document.getElementById('value').value = '';
+  }
+
+  function getProfile() {
+    return profile;
+  }
+
+  function onCreate(object) {
+    db.onCreate(object, getProfile, {}, onChange, onChange);
+  }
+
+  db.info(function (err, info) {
+    db.changes({
+        since: info.update_seq,
+        live: true
+      })
+      .on('create', onCreate);
+  });
+
+  var opts = { live: true };
+  db.replicate.to(remoteCouch, opts);
+  db.replicate.from(remoteCouch, opts);
+
+  db.all().then(function (docs) {
+    if (docs) {
+      profile = first(docs);
+      display();
+    }
+
+    // For the sake of keeping our iris example clean we will call cleanup here, but normally we
+    // would call it from a cron job
+    if (location.search) { // using iris?
+      db.cleanup();   
+    }
+  });
+
+</script>
+
+<select id="attr"><option>name</option><option>age</option><option>location</option></select>
+<input id="value" type="text" placeholder="value">
+<button onclick="save()">Save</button>
+
+<h1>Profile: <span id="profile-text"></span></h1>
+
+</body>
+
+</html>

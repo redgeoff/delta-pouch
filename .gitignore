@@ -3,5 +3,6 @@ node_modules
 *~
 coverage
 test/test-bundle.js
+test/.test-bundle.js
 npm-debug.log
 dist
