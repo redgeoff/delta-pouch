@@ -1,0 +1,22 @@
+<html>
+
+<body>
+<script src="//cdn.jsdelivr.net/pouchdb/2.2.3/pouchdb.min.js"></script> <!-- TODO: how to properly reference pouchdb.js?? -->
+<script src="../../dist/pouchdb.delta-pouch.js"></script>
+<script src="main.js"></script>
+
+<h1>Websites</h1>
+
+<button id="newButton" onclick="editSite()">New</button>
+<div id="form" style="display:none;">
+  <label>Name</label>: <input id="name" type="text">
+  <label>URL</label>: <input id="url" type="url">
+  <button onclick="saveSite()">Save</button>
+</div>
+<ul id="siteList"></ul>
+<button onclick="cleanup()">Cleanup</button>
+<button onclick="purge()">Purge</button>
+
+</body>
+
+</html>
