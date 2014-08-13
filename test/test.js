@@ -190,6 +190,14 @@ function tests(dbName, dbType) {
       });
     }
 
+    it('should cleanup when no docs', function () {
+      return new Promise(function (fulfill) {
+        db.cleanup().then(function () {
+          fulfill();
+        });
+      });
+    });
+
     it('should cleanup updates and be reflected in all', function () {
       return new Promise(function (fulfill) {
         saveTrash().then(function (dishesId) {
