@@ -62,7 +62,7 @@ exports.all = function () {
         deletions = {};
     db.allDocs({include_docs: true}, function (err, doc) {
 
-      if (doc.rows.length === 0) {
+      if (!doc || doc.rows.length === 0) {
         fulfill();
         return;
       }
@@ -212,6 +212,11 @@ exports.cleanup = function () {
   var db = this;
   return new Promise(function (fulfill) {
     db.allDocs({ include_docs: true }, function (err, doc) {
+
+      if (!doc || doc.rows.length === 0) {
+        fulfill();
+        return;
+      }
 
       var docs = {}, deletions = {};
 
