@@ -93,11 +93,11 @@ Delta pouch stores every change as a doc. The cleanup() function removes any cha
 
 Running the included examples
 ----
-    Note: you must have couchdb installed and Admin Party enabled
+Note: you must have couchdb installed and Admin Party enabled
     npm install
     npm run build
     npm run dev-server
-    Visit the target example in your browser, e.g. http://127.0.0.1:8001/examples/websites
+Visit the target example in your browser, e.g. http://127.0.0.1:8001/examples/websites
 
 Contributing
 ----
