@@ -94,7 +94,7 @@ exports.all = function () {
   });
 };
 
-// TODO: refactor to use a events like pouch, e.g. on('update', cb)??
+// TODO: refactor to use events like pouch, e.g. on('update', cb)??
 // TODO: create a more customizable construct for deletions, e.g. deletions.wasDeleted(),
 //       deletions.setDeleted()??
 exports.onCreate = function (object, getItem, deletions, onCreate, onUpdate, onDelete) {
@@ -238,10 +238,6 @@ exports.cleanup = function () {
     });
   });
 };
-
-// TESTS: what if client 1 deletes, client 2 updates afterwards???
-//   {id: 1, title: 'one'}, {$id: 1, $deleted: true}, {$id: 1, title: 'two'}
-//   Also need to worry about this when get change event
 
 /* istanbul ignore next */
 if (typeof window !== 'undefined' && window.PouchDB) {
