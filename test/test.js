@@ -16,7 +16,7 @@ chai.use(require("chai-as-promised"));
 // more variables you might want
 //
 chai.should(); // var should = chai.should();
-var Promise = require('bluebird'); // var Promise = require('bluebird');
+var Promise = require('bluebird');
 
 var dbs;
 if (process.browser) {
@@ -39,9 +39,26 @@ function length(obj) {
   return n;
 }
 
+function setTimeoutPromise(ms) {
+  return new Promise(function (resolve) {
+    setTimeout(resolve, ms);
+  });
+}
+
 function tests(dbName, dbType) {
 
   var db;
+
+  // Wait a millsecond after saving before resolving to prevent two saves on the same millisecond.
+  // It is "fine" if two saves occur on the same millisecond, but it is impossible to guarantee test
+  // results when this happens.
+  function save(doc) {
+    return db.save(doc).then(function (response) {
+      return setTimeoutPromise(1).then(function () {
+        return response;
+      });
+    });
+  }
 
   beforeEach(function () {
     db = new Pouch(dbName);
@@ -53,7 +70,7 @@ function tests(dbName, dbType) {
 
   describe(dbType + ': delta test suite', function () {
 
-    this.timeout(5000);
+    // this.timeout(5000);
 
     it('should clone', function () {
       var doc = { title: 'take out trash', priority: 'low' }, clonedDoc = db.clone(doc);
@@ -63,7 +80,7 @@ function tests(dbName, dbType) {
 
     it('should save', function () {
       var doc = { title: 'take out trash', priority: 'low' };
-      return db.save(doc).then(function (response) {
+      return save(doc).then(function (response) {
         response.should.eql({ ok: true, id: response.id, rev: response.rev});
       });
     });
@@ -75,13 +92,11 @@ function tests(dbName, dbType) {
     });
 
     function saveTrash() {
-      return new Promise(function (fulfill) {
-        db.save({ title: 'take out trash' }).then(function (doc) {
-          db.save({ $id: doc.id, priority: 'medium' }).then(function () {
-            db.save({ $id: doc.id, title: 'take out trash and recycling' }).then(function () {
-              db.save({ $id: doc.id, priority: 'high' }).then(function () {
-                fulfill(doc.id);
-              });
+      return save({ title: 'take out trash' }).then(function (doc) {
+        return save({ $id: doc.id, priority: 'medium' }).then(function () {
+          return save({ $id: doc.id, title: 'take out trash and recycling' }).then(function () {
+            return save({ $id: doc.id, priority: 'high' }).then(function () {
+              return doc.id;
             });
           });
         });
@@ -89,14 +104,11 @@ function tests(dbName, dbType) {
     }
 
     function assertAllDocs(objs) {
-      return new Promise(function (fulfill) {
-        db.all().then(function (docs) {
-          length(docs).should.equal(length(objs));
-          for (var i in objs) {
-            assertContains(docs[i], objs[1]);
-          }
-          fulfill();
-        });
+      return db.all().then(function (docs) {
+        length(docs).should.equal(length(objs));
+        for (var i in objs) {
+          assertContains(docs[i], objs[1]);
+        }
       });
     }
 
@@ -111,13 +123,11 @@ function tests(dbName, dbType) {
     }
 
     function saveDishes() {
-      return new Promise(function (fulfill) {
-        db.save({ priority: 'low' }).then(function (doc) {
-          db.save({ $id: doc.id, title: 'clean dishes' }).then(function () {
-            db.save({ $id: doc.id, title: 'clean & dry dishes' }).then(function () {
-              db.save({ $id: doc.id, priority: 'medium' }).then(function () {
-                fulfill(doc.id);
-              });
+      return save({ priority: 'low' }).then(function (doc) {
+        return save({ $id: doc.id, title: 'clean dishes' }).then(function () {
+          return save({ $id: doc.id, title: 'clean & dry dishes' }).then(function () {
+            return save({ $id: doc.id, priority: 'medium' }).then(function () {
+              return doc.id;
             });
           });
         });
@@ -125,17 +135,15 @@ function tests(dbName, dbType) {
     }
 
     function deleteTrash() {
-      return new Promise(function (fulfill) {
-        saveTrash().then(function (trashId) {
-          saveDishes().then(function (dishesId) {
-            db.delete(trashId).then(function () {
-              // save after delete shouldn't change docs
-              db.save({ $id: trashId, title: 'replace trash bag' }).then(function () {
-                var docs = {};
-                docs[dishesId] = { title: 'clean & dry dishes', priority: 'medium' };
-                assertAllDocs(docs).then(function () {
-                  fulfill(dishesId);
-                });
+      return saveTrash().then(function (trashId) {
+        return saveDishes().then(function (dishesId) {
+          return db.delete(trashId).then(function () {
+            // save after delete shouldn't change docs
+            return save({ $id: trashId, title: 'replace trash bag' }).then(function () {
+              var docs = {};
+              docs[dishesId] = { title: 'clean & dry dishes', priority: 'medium' };
+              return assertAllDocs(docs).then(function () {
+                return dishesId;
               });
             });
           });
@@ -150,24 +158,20 @@ function tests(dbName, dbType) {
     });
 
     it('should update doc and be reflected in all', function () {
-      return new Promise(function (fulfill) {
-        return saveTrash().then(function (id) {
-          var docs = {};
-          docs[id] = { title: 'take out trash and recycling', priority: 'high' };
-          assertAllDocs(docs).then(fulfill);
-        });
+      return saveTrash().then(function (id) {
+        var docs = {};
+        docs[id] = { title: 'take out trash and recycling', priority: 'high' };
+        return assertAllDocs(docs);
       });
     });
 
     it('should update docs and be reflected in all', function () {
-      return new Promise(function (fulfill) {
-        saveTrash().then(function (trashId) {
-          saveDishes().then(function (dishesId) {
-            var docs = {};
-            docs[trashId] = { title: 'take out trash and recycling', priority: 'high' };
-            docs[dishesId] = { title: 'clean & dry dishes', priority: 'medium' };
-            assertAllDocs(docs).then(fulfill);
-          });
+      return saveTrash().then(function (trashId) {
+        return saveDishes().then(function (dishesId) {
+          var docs = {};
+          docs[trashId] = { title: 'take out trash and recycling', priority: 'high' };
+          docs[dishesId] = { title: 'clean & dry dishes', priority: 'medium' };
+          return assertAllDocs(docs);
         });
       });
     });
@@ -177,63 +181,48 @@ function tests(dbName, dbType) {
     });
 
     function cleanup() {
-      return new Promise(function (fulfill) {
-        db.cleanup().then(function () {
-          db.allDocs({ include_docs: true }, function (err, doc) {
-            doc.rows.sort(function (a, b) {
-              return a.doc.$createdAt > b.doc.$createdAt;
-            });
-            fulfill(doc);
+      return db.cleanup().then(function () {
+        return db.allDocs({ include_docs: true }).then(function (doc) {
+          doc.rows.sort(function (a, b) {
+            return a.doc.$createdAt > b.doc.$createdAt;
           });
+          return doc;
         });
       });
     }
 
     it('should cleanup when no docs', function () {
-      return new Promise(function (fulfill) {
-        db.cleanup().then(function () {
-          fulfill();
-        });
-      });
+      return db.cleanup();
     });
 
     it('should cleanup updates and be reflected in all', function () {
-      return new Promise(function (fulfill) {
-        saveTrash().then(function (dishesId) {
-          cleanup().then(function (doc) {
-            assertContains(doc.rows[0].doc,
-              { $id: dishesId, title: 'take out trash and recycling' });
-            assertContains(doc.rows[1].doc,
-              { $id: dishesId, priority: 'high' });
-            fulfill();
-          });
+      return saveTrash().then(function (dishesId) {
+        return cleanup().then(function (doc) {
+          assertContains(doc.rows[0].doc,
+            { $id: dishesId, title: 'take out trash and recycling' });
+          assertContains(doc.rows[1].doc,
+            { $id: dishesId, priority: 'high' });
         });
       });
     });
 
     it('should cleanup deletions and be reflected in all', function () {
-      return new Promise(function (fulfill) {
-        saveTrash().then(function (trashId) {
-          db.delete(trashId).then(function () {
-            cleanup().then(function (doc) {
-              doc.rows.length.should.equal(0);
-              fulfill();
-            });
+      return saveTrash().then(function (trashId) {
+        return db.delete(trashId).then(function () {
+          return cleanup().then(function (doc) {
+            doc.rows.length.should.equal(0);
           });
         });
       });
     });
 
     it('should cleanup deletions and a following update and be reflected in all', function () {
-      return new Promise(function (fulfill) {
-        saveTrash().then(function (trashId) {
-          db.delete(trashId).then(function () {
-            // save after delete shouldn't change docs
-            db.save({ $id: trashId, title: 'replace trash bag' }).then(function () {
-              cleanup().then(function (doc) {
-                doc.rows.length.should.equal(0);
-                fulfill();
-              });
+      return saveTrash().then(function (trashId) {
+        return db.delete(trashId).then(function () {
+          // save after delete shouldn't change docs
+          return save({ $id: trashId, title: 'replace trash bag' }).then(function () {
+            return cleanup().then(function (doc) {
+              doc.rows.length.should.equal(0);
             });
           });
         });
@@ -241,44 +230,38 @@ function tests(dbName, dbType) {
     });
 
     it('should cleanup docs and be reflected in all', function () {
-      return new Promise(function (fulfill) {
-        deleteTrash().then(function (dishesId) {
-          cleanup().then(function (doc) {
-            assertContains(doc.rows[0].doc,
-              { $id: dishesId, title: 'clean & dry dishes' });
-            assertContains(doc.rows[1].doc,
-              { $id: dishesId, priority: 'medium' });
-            fulfill();
-          });
+      return deleteTrash().then(function (dishesId) {
+        return cleanup().then(function (doc) {
+          assertContains(doc.rows[0].doc,
+            { $id: dishesId, title: 'clean & dry dishes' });
+          assertContains(doc.rows[1].doc,
+            { $id: dishesId, priority: 'medium' });
         });
       });
     });
 
     it('should save changes', function () {
-      return new Promise(function (fulfill) {
-        var item = { $id: 1, title: 'take out trash', priority: 'high'},
-            updates = { title: 'take out recycling', priority: 'high' };
-        db.saveChanges(item, updates, function (response) {
-          assertContains(response,
-            { $id: item.$id, title: updates.title, priority: item.priority });
-          var docs = {};
-          docs[item.$id] = { $id: item.$id, title: updates.title };
-          assertAllDocs(docs).then(fulfill);
-        });
+      var item = { $id: 1, title: 'take out trash', priority: 'high'},
+          updates = { title: 'take out recycling', priority: 'high' };
+      return db.saveChanges(item, updates).then(function (response) {
+        (typeof response).should.not.equal('undefined');
+        assertContains(response,
+          { $id: item.$id, title: updates.title, priority: item.priority });
+        var docs = {};
+        docs[item.$id] = { $id: item.$id, title: updates.title };
+        return assertAllDocs(docs);
       });
     });
 
     it('should save no changes', function () {
       var item = { $id: 1, title: 'take out trash', priority: 'high'},
           updates = {};
-      db.saveChanges(item, updates, function () {
-        failure();
-      });
+      return db.saveChanges(item, updates);
     });
 
     it('should onCreate onCreate', function () {
       var item = { title: 'take out trash' };
-      db.save(item).then(function (object) {
+      return save(item).then(function (object) {
         var deletions = {};
         function getItem() {
           return null;
@@ -292,7 +275,7 @@ function tests(dbName, dbType) {
 
     it('should onCreate onCreate ignore deletions', function () {
       var item = { title: 'take out trash' };
-      db.save(item).then(function (object) {
+      return save(item).then(function (object) {
         var deletions = {};
         deletions[object.id] = true;
         function getItem() {
@@ -305,18 +288,17 @@ function tests(dbName, dbType) {
       });
     });
 
-    it('should onCreate onUpdate', function (done) {
+    it('should onCreate onUpdate', function () {
       var item1 = { title: 'take out trash' };
-      db.save(item1).then(function (object1) {
+      return save(item1).then(function (object1) {
         var item2 = { $id: object1.id, title: 'take out recycling' };
-        db.save(item2).then(function (object2) {
+        return save(item2).then(function (object2) {
           var deletions = {};
           function getItem() {
             return { $id: object1.id, title: item1.title };
           }
           function onUpdate(doc) {
             assertContains(doc, { $id: item2.$id, title: item2.title });
-            done();
           }
           db.onCreate(object2, getItem, deletions, null, onUpdate);
         });
@@ -325,7 +307,7 @@ function tests(dbName, dbType) {
 
     it('should onCreate onUpdate ignore deletions', function () {
       var item = { title: 'take out trash' };
-      db.save(item).then(function (object) {
+      return save(item).then(function (object) {
         var deletions = {};
         deletions[object.id] = true;
         function getItem() {
@@ -338,9 +320,9 @@ function tests(dbName, dbType) {
       });
     });
 
-    it('should onCreate onDelete', function (done) {
+    it('should onCreate onDelete', function () {
       var item = { $deleted: true };
-      db.save(item).then(function (object) {
+      return save(item).then(function (object) {
         var deletions = {};
         function getItem() {
           return { $id: object.id, title: item.title };
@@ -350,7 +332,6 @@ function tests(dbName, dbType) {
           var dels = {};
           dels[id] = true;
           assertContains(deletions, dels);
-          done();
         }
         db.onCreate(object, getItem, deletions, null, null, onDelete);
       });
@@ -358,7 +339,7 @@ function tests(dbName, dbType) {
 
     it('should onCreate onDelete no item', function () {
       var item = { $deleted: true };
-      db.save(item).then(function (object) {
+      return save(item).then(function (object) {
         var deletions = {};
         function getItem() {
           return null;
@@ -368,6 +349,11 @@ function tests(dbName, dbType) {
         }
         db.onCreate(object, getItem, deletions, null, null, onDelete);
       });
+    });
+
+    it('should getAndRemove', function () {
+      // Note: getAndRemove already tested by cleanup
+      return db.getAndRemove('123');
     });
 
     // TODO: test simulatenous client updates/deletes
