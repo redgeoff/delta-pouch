@@ -1,7 +1,7 @@
 {
   "name": "delta-pouch",
   "version": "0.1.0",
-  "description": "Delta PouchDB Plugin",
+  "description": "A PouchDB plugin for collaborative editing of docs",
   "main": "index.js",
   "repository": {
     "type": "git",
@@ -17,7 +17,7 @@
     "couch",
     "couchdb"
   ],
-  "author": "",
+  "author": "Geoffrey Cox",
   "license": "Apache",
   "bugs": {
     "url": "https://github.com/redgeoff/delta-pouch/issues"

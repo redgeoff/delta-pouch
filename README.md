@@ -1,7 +1,7 @@
 Delta Pouch
 =====
 
-[![Build Status](https://travis-ci.org/pouchdb/plugin-seed.svg)](https://travis-ci.org/pouchdb/plugin-seed)
+[![Build Status](https://travis-ci.org/redgeoff/delta-pouch.svg)](https://travis-ci.org/redgeoff/delta-pouch)
 
 A PouchDB plugin for partial updates that uses the every-doc-is-a-delta storage pattern. You can use delta pouch to enable collaborative editing of the same docs.
 
@@ -94,9 +94,11 @@ Delta pouch stores every change as a doc. The cleanup() function removes any cha
 Running the included examples
 ----
 Note: you must have couchdb installed and Admin Party enabled
+
     npm install
     npm run build
     npm run dev-server
+
 Visit the target example in your browser, e.g. http://127.0.0.1:8001/examples/websites
 
 Contributing

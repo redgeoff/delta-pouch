@@ -53,7 +53,7 @@ function tests(dbName, dbType) {
 
   describe(dbType + ': delta test suite', function () {
 
-    // this.timeout(5000);
+    this.timeout(5000);
 
     it('should clone', function () {
       var doc = { title: 'take out trash', priority: 'low' }, clonedDoc = db.clone(doc);
@@ -189,6 +189,14 @@ function tests(dbName, dbType) {
         });
       });
     }
+
+    it('should cleanup when no docs', function () {
+      return new Promise(function (fulfill) {
+        db.cleanup().then(function () {
+          fulfill();
+        });
+      });
+    });
 
     it('should cleanup updates and be reflected in all', function () {
       return new Promise(function (fulfill) {
