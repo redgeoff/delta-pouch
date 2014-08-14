@@ -142,12 +142,14 @@ exports.saveChanges = function (item, updates, onChange) {
 };
 
 function getAndRemove(db, id) {
-  return new Promise(function (fulfill) {
-    db.get(id).then(function (object) {
-      db.remove(object).then(fulfill);
-    }).catch(function () { // not found?
-      fulfill();
-    });
+  return db.get(id).then(function (object) {
+    return db.remove(object);
+  }).catch(function (err) {
+    // If the doc isn't found, no biggie. Else throw.
+    /* istanbul ignore if */
+    if (err.status !== 404) {
+      throw err;
+    }
   });
 }
 
