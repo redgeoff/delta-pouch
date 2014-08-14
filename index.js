@@ -29,8 +29,8 @@ exports.merge = function (obj1, obj2) {
 function reduce(items, reducer, i) {
   return new Promise(function (fulfill) {
     if (items[i]) {
-      reducer(null, items[i], i, items.length).then(function () {
-        reduce(items, reducer, i + 1).then(fulfill);
+      return reducer(null, items[i], i, items.length).then(function () {
+        reduce(items, reducer, i + 1);
       });
     } else {
       fulfill();
@@ -40,11 +40,7 @@ function reduce(items, reducer, i) {
 
 function save(db, doc) {
   doc.$createdAt = (new Date()).toJSON();
-  return new Promise(function (fulfill) {
-    db.post(doc).then(function (doc) {
-      fulfill(doc);
-    });
-  });
+  return db.post(doc);
 }
 
 exports.save = function (doc) {
@@ -150,52 +146,46 @@ function getAndRemove(db, id) {
  * e.g. {id: 1, title: 'one'}, {$id: 1, $deleted: true}, {$id: 1, title: 'two'}
  */
 function removeDeletions(db, doc, deletions) {
-  return new Promise(function (fulfill) {
-    var promises = [];
-    doc.rows.forEach(function (el, i) {
-      if (deletions[el.doc.$id]) { // deleted?
-        promises.push(getAndRemove(db, el.id));
-      }
-      if (i === doc.rows.length - 1) { // last element?
-        // promise shouldn't fulfill until all deletions have completed
-        Promise.all(promises).then(fulfill);
-      }
-    });
+  var promises = [];
+  doc.rows.forEach(function (el) {
+    if (deletions[el.doc.$id]) { // deleted?
+      promises.push(getAndRemove(db, el.id));
+    }
   });
+  // promise shouldn't fulfill until all deletions have completed
+  return Promise.all(promises);
 }
 
 function cleanupDoc(db, el, docs, deletions) {
-  return new Promise(function (fulfill) {
-    db.get(el.doc._id).then(function (object) {
-      var promises = [];
+  return db.get(el.doc._id).then(function (object) {
+    var promises = [];
 
-      if (!el.doc.$id) { // first delta for doc?
-        el.doc.$id = el.doc._id;
+    if (!el.doc.$id) { // first delta for doc?
+      el.doc.$id = el.doc._id;
+    }
+
+    if (el.doc.$deleted || deletions[el.doc.$id]) { // deleted?
+      deletions[el.doc.$id] = true;
+      promises.push(db.remove(object));
+    } else if (docs[el.doc.$id]) { // exists?
+      var undef = false;
+      for (var k in el.doc) {
+        if (typeof docs[el.doc.$id][k] === 'undefined') {
+          undef = true;
+          break;
+        }
       }
-
-      if (el.doc.$deleted || deletions[el.doc.$id]) { // deleted?
-        deletions[el.doc.$id] = true;
+      if (undef) {
+        docs[el.doc.$id] = exports.merge(docs[el.doc.$id], el.doc);
+      } else { // duplicate update, remove
         promises.push(db.remove(object));
-      } else if (docs[el.doc.$id]) { // exists?
-        var undef = false;
-        for (var k in el.doc) {
-          if (typeof docs[el.doc.$id][k] === 'undefined') {
-            undef = true;
-            break;
-          }
-        }
-        if (undef) {
-          docs[el.doc.$id] = exports.merge(docs[el.doc.$id], el.doc);
-        } else { // duplicate update, remove
-          promises.push(db.remove(object));
-        }
-      } else {
-        docs[el.doc.$id] = el.doc;
       }
+    } else {
+      docs[el.doc.$id] = el.doc;
+    }
 
-      // promise shouldn't fulfill untill all deletions have completed
-      Promise.all(promises).then(fulfill);
-    });
+    // promise shouldn't fulfill untill all deletions have completed
+    return Promise.all(promises);
   });
 }
 
@@ -203,32 +193,23 @@ function cleanupDoc(db, el, docs, deletions) {
 //       This way can use timestamp so not cleaning same range each time
 exports.cleanup = function () {
   var db = this;
-  return new Promise(function (fulfill) {
-    db.allDocs({ include_docs: true }, function (err, doc) {
+  return db.allDocs({ include_docs: true }, function (err, doc) {
 
-      if (!doc || doc.rows.length === 0) {
-        fulfill();
-        return;
-      }
+    var docs = {}, deletions = {};
 
-      var docs = {}, deletions = {};
-
-      // reverse sort by createdAt
-      doc.rows.sort(function (a, b) {
-        return a.doc.$createdAt < b.doc.$createdAt;
-      });
-
-      return reduce(doc.rows, function (total, current) {
-        return cleanupDoc(db, current, docs, deletions);
-      }, 0).then(function () {
-        if (empty(deletions)) {
-          fulfill();
-        } else {
-          removeDeletions(db, doc, deletions).then(fulfill);
-        }
-      });
-
+    // reverse sort by createdAt
+    doc.rows.sort(function (a, b) {
+      return a.doc.$createdAt < b.doc.$createdAt;
     });
+
+    return reduce(doc.rows, function (total, current) {
+      return cleanupDoc(db, current, docs, deletions);
+    }, 0).then(function () {
+      if (!empty(deletions)) {
+        return removeDeletions(db, doc, deletions);
+      }
+    });
+
   });
 };
 
