@@ -56,9 +56,6 @@
     "watchify": "~0.4.1",
     "wd": "^0.2.21"
   },
-  "peerDependencies": {
-    "pouchdb": ">= 2.2.0"
-  },
   "browser": {
     "crypto": false
   },
