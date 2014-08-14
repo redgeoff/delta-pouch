@@ -57,40 +57,31 @@ exports.delete = function (id) {
 
 exports.all = function () {
   var db = this;
-  return new Promise(function (fulfill) {
-    var docs = {},
-        deletions = {};
-    db.allDocs({include_docs: true}, function (err, doc) {
+  var docs = {},
+    deletions = {};
+  return db.allDocs({include_docs: true}).then(function (doc) {
 
-      if (!doc || doc.rows.length === 0) {
-        fulfill();
-        return;
-      }
-
-      // sort by createdAt as cannot guarantee that order preserved by pouch/couch
-      doc.rows.sort(function (a, b) {
-        return a.doc.$createdAt > b.doc.$createdAt;
-      });
-
-      doc.rows.forEach(function (el, i) {
-        if (!el.doc.$id) { // first delta for doc?
-          el.doc.$id = el.doc._id;
-        }
-        if (el.doc.$deleted) { // deleted?
-          delete(docs[el.doc.$id]);
-          deletions[el.doc.$id] = true;
-        } else if (!deletions[el.doc.$id]) { // update before any deletion?
-          if (docs[el.doc.$id]) { // exists?
-            docs[el.doc.$id] = exports.merge(docs[el.doc.$id], el.doc);
-          } else {
-            docs[el.doc.$id] = el.doc;
-          }
-        }
-        if (i === doc.rows.length - 1) { // last element?
-          fulfill(docs);
-        }
-      });
+    // sort by createdAt as cannot guarantee that order preserved by pouch/couch
+    doc.rows.sort(function (a, b) {
+      return a.doc.$createdAt > b.doc.$createdAt;
     });
+
+    doc.rows.forEach(function (el) {
+      if (!el.doc.$id) { // first delta for doc?
+        el.doc.$id = el.doc._id;
+      }
+      if (el.doc.$deleted) { // deleted?
+        delete(docs[el.doc.$id]);
+        deletions[el.doc.$id] = true;
+      } else if (!deletions[el.doc.$id]) { // update before any deletion?
+        if (docs[el.doc.$id]) { // exists?
+          docs[el.doc.$id] = exports.merge(docs[el.doc.$id], el.doc);
+        } else {
+          docs[el.doc.$id] = el.doc;
+        }
+      }
+    });
+    return docs;
   });
 };
 

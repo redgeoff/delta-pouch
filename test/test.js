@@ -143,10 +143,9 @@ function tests(dbName, dbType) {
       });
     }
 
-    it('all should call callback even when no docs', function (done) {
-      db.all().then(function (docs) {
-        (typeof docs).should.equal('undefined');
-        done();
+    it('all should call callback even when no docs', function () {
+      return db.all().then(function (docs) {
+        docs.should.deep.equal({});
       });
     });
 
