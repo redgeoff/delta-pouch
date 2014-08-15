@@ -30,7 +30,7 @@ function reduce(items, reducer, i) {
   return new Promise(function (fulfill) {
     if (items[i]) {
       return reducer(null, items[i], i, items.length).then(function () {
-        reduce(items, reducer, i + 1);
+        return reduce(items, reducer, i + 1);
       });
     } else {
       fulfill();
