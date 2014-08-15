@@ -38,15 +38,6 @@ exports.delete = function (id) {
   return save(this, {$id: id, $deleted: true});
 };
 
-function each(items, callback, i) {
-  if (items[i]) {
-    return callback(items[i]).then(function () {
-      return each(items, callback, i + 1);
-    });
-  }
-  return Promise.resolve();
-}
-
 exports.all = function () {
   var db = this;
   var docs = {},
@@ -192,16 +183,19 @@ exports.cleanup = function () {
   var db = this;
   return db.allDocs({ include_docs: true }).then(function (doc) {
 
-    var docs = {}, deletions = {};
+    var docs = {}, deletions = {}, chain = Promise.resolve();
 
     // reverse sort by createdAt
     doc.rows.sort(function (a, b) {
       return a.doc.$createdAt < b.doc.$createdAt;
     });
 
-    return each(doc.rows, function (el) {
-      return cleanupDoc(db, el, docs, deletions);
-    }, 0).then(function () {
+    // The cleanupDoc() calls must execute in sequential order
+    doc.rows.forEach(function (el) {
+      chain = chain.then(function () { return cleanupDoc(db, el, docs, deletions); });
+    });
+
+    return chain.then(function () {
       if (!empty(deletions)) {
         return removeDeletions(db, doc, deletions);
       }
