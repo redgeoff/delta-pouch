@@ -122,7 +122,7 @@ exports.saveChanges = function (item, updates) {
       return item;
     });
   }
-  return new Promise(function (resolve) { resolve(); }); // TODO: best way?
+  return Promise.resolve();
 };
 
 function getAndRemove(db, id) {
