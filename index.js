@@ -44,7 +44,7 @@ function each(items, callback, i) {
       return each(items, callback, i + 1);
     });
   }
-  return new Promise(function (resolve) { resolve(); }); // TODO: best way?
+  return Promise.resolve();
 }
 
 exports.all = function () {
