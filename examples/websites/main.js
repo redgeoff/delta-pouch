@@ -1,6 +1,6 @@
 'use strict';
 
-/* exported purge, editSite, removeSite, saveSite, cleanup */
+/* exported doPurge, editSite, removeSite, saveSite, cleanup */
 /* global PouchDB, Promise */
 
 var sites = [], curSite = null, deletions = {}, db = new PouchDB('websites'),
@@ -99,7 +99,7 @@ function removeSite(id) {
 }
 
 function saveChanges() {
-  db.saveChanges(curSite, getFormValues(), function (newSite) {
+  db.saveChanges(curSite, getFormValues()).then(function (newSite) {
     updateItem(newSite);      
   });
 }
@@ -144,25 +144,18 @@ db.all().then(function (docs) {
 
 // NOTE: this function does not cause the UI to update. It is provided only for testing purposes.
 function purge() {
-  return new Promise(function (resolve) {
-    var promises = [], done = function () {
-      console.log('purge done');
-      resolve();
-    };
-    db.allDocs({include_docs: true}, function (err, doc) {
-      if (!doc || doc.rows.length === 0) {
-        done();
-      } else {
-        doc.rows.forEach(function (el, i) {
-          db.get(el.doc._id).then(function (object) {
-            promises.push(db.remove(object));
-            if (i === doc.rows.length - 1) { // last element?
-              Promise.all(promises).then(done);
-            }
-          });
-        });
-      }
+  var promises = [];
+  return db.allDocs({include_docs: true}).then(function (doc) {
+    doc.rows.forEach(function (el) {
+      promises.push(db.getAndRemove(el.doc._id));
     });
+    return Promise.all(promises);
+  });
+}
+
+function doPurge() {
+  purge().then(function () {
+    console.log('purge done');
   });
 }
 

@@ -25,19 +25,6 @@ exports.merge = function (obj1, obj2) {
   return merged;
 };
 
-// // Note: this function is roughly compatible with bluebirdjs's reduce
-// function reduce(items, reducer, i) {
-//   return new Promise(function (resolve) {
-//     if (items[i]) {
-//       return reducer(null, items[i], i, items.length).then(function () {
-//         return reduce(items, reducer, i + 1);
-//       });
-//     } else {
-//       resolve();
-//     }
-//   });
-// }
-
 function save(db, doc) {
   doc.$createdAt = (new Date()).toJSON();
   return db.post(doc);
@@ -50,6 +37,15 @@ exports.save = function (doc) {
 exports.delete = function (id) {
   return save(this, {$id: id, $deleted: true});
 };
+
+function each(items, callback, i) {
+  if (items[i]) {
+    return callback(items[i]).then(function () {
+      return each(items, callback, i + 1);
+    });
+  }
+  return new Promise(function (resolve) { resolve(); }); // TODO: best way?
+}
 
 exports.all = function () {
   var db = this;
@@ -118,52 +114,15 @@ function getChanges(item, updates) {
   return change ? changes : null;
 }
 
-// exports.saveChanges = function (item, updates, onChange) {
-//   var db = this, changes = getChanges(item, updates); // afterwards, item contains the updates
-//   if (changes !== null) {
-//     changes.$id = item.$id;
-//     db.save(changes).then(function () {
-//       onChange(item);
-//     });
-//   }
-// };
-
-// // TODO: rewrite examples to work w/ new promise structure here
-// exports.saveChanges = function (item, updates) {
-//   var db = this;
-//   return new Promise(function (resolve, reject) {
-//     var changes = getChanges(item, updates); // afterwards, item contains the updates
-//     console.log('changes');
-//     console.log(changes);
-//     if (changes !== null) {
-//       changes.$id = item.$id;
-//       return db.save(changes).then(function () {
-//         return item;
-//       });
-//     } else {
-//       reject();
-//     }
-//   });
-// };
-
-// TODO: rewrite examples to work w/ new promise structure here
 exports.saveChanges = function (item, updates) {
-  var db = this;
-  return new Promise(function (resolve, reject) {
-    var changes = getChanges(item, updates); // afterwards, item contains the updates
-    console.log('changes');
-    console.log(changes);
-    if (changes !== null) {
-      changes.$id = item.$id;
-      return db.save(changes).then(function () {
-        console.log('item');
-        console.log(item);
-        return resolve(item); // TODO: why can't we just return item here?
-      }).catch(reject);
-    } else {
-      resolve();
-    }
-  });
+  var db = this, changes = getChanges(item, updates); // afterwards, item contains the updates
+  if (changes !== null) {
+    changes.$id = item.$id;
+    return db.save(changes).then(function () {
+      return item;
+    });
+  }
+  return new Promise(function (resolve) { resolve(); }); // TODO: best way?
 };
 
 function getAndRemove(db, id) {
@@ -177,6 +136,10 @@ function getAndRemove(db, id) {
     }
   });
 }
+
+exports.getAndRemove = function (id) {
+  return getAndRemove(this, id);
+};
 
 /*
  * We need a second pass for deletions as client 1 may delete and then
@@ -194,45 +157,7 @@ function removeDeletions(db, doc, deletions) {
   return Promise.all(promises);
 }
 
-// function cleanupDoc(db, el, docs, deletions) {
-//   return db.get(el.doc._id).then(function (object) {
-//     var promises = [];
-
-//     if (!el.doc.$id) { // first delta for doc?
-//       el.doc.$id = el.doc._id;
-//     }
-
-//     if (el.doc.$deleted || deletions[el.doc.$id]) { // deleted?
-//       deletions[el.doc.$id] = true;
-//       promises.push(db.remove(object));
-//     } else if (docs[el.doc.$id]) { // exists?
-//       var undef = false;
-//       for (var k in el.doc) {
-//         if (typeof docs[el.doc.$id][k] === 'undefined') {
-//           undef = true;
-//           break;
-//         }
-//       }
-//       if (undef) {
-//         docs[el.doc.$id] = exports.merge(docs[el.doc.$id], el.doc);
-//       } else { // duplicate update, remove
-//         console.log('removing=');
-//         console.log(object);
-//         promises.push(db.remove(object));
-//       }
-//     } else {
-//       docs[el.doc.$id] = el.doc;
-//     }
-
-//     console.log('cleanupDoc num promises = ' + promises.length);
-
-//     // promise shouldn't resolve untill all deletions have completed
-//     return Promise.all(promises);
-//   });
-// }
-
 function cleanupDoc(db, el, docs, deletions) {
-  console.log('cleanup');
   return db.get(el.doc._id).then(function (object) {
 
     if (!el.doc.$id) { // first delta for doc?
@@ -253,97 +178,13 @@ function cleanupDoc(db, el, docs, deletions) {
       if (undef) {
         docs[el.doc.$id] = exports.merge(docs[el.doc.$id], el.doc);
       } else { // duplicate update, remove
-        console.log('removing=');
-        console.log(object);
         return db.remove(object);
       }
     } else {
       docs[el.doc.$id] = el.doc;
     }
-
-    console.log('nothing to delete');
   });
 }
-
-// function cleanupDoc(db, el, docs, deletions) {
-//   console.log('cleanup');
-//   return new Promise(function (resolve, reject) {
-//     return db.get(el.doc._id).then(function (object) {
-
-//       if (!el.doc.$id) { // first delta for doc?
-//         el.doc.$id = el.doc._id;
-//       }
-
-//       if (el.doc.$deleted || deletions[el.doc.$id]) { // deleted?
-//         deletions[el.doc.$id] = true;
-//         return db.remove(object);
-//       } else if (docs[el.doc.$id]) { // exists?
-//         var undef = false;
-//         for (var k in el.doc) {
-//           if (typeof docs[el.doc.$id][k] === 'undefined') {
-//             undef = true;
-//             break;
-//           }
-//         }
-//         if (undef) {
-//           docs[el.doc.$id] = exports.merge(docs[el.doc.$id], el.doc);
-//         } else { // duplicate update, remove
-//           console.log('removing=');
-//           console.log(object);
-//           return db.remove(object);
-//         }
-//       } else {
-//         docs[el.doc.$id] = el.doc;
-//       }
-
-//       resolve();
-//     }).catch(reject);
-//   });
-// }
-
-function each(items, callback, i) {
-  console.log('i=' + i);
-  if (items[i]) {
-    console.log('exists! priority: ' + items[i].doc.priority + ', title: ' + items[i].doc.title);
-    return callback(items[i]).then(function () {
-//      if (items[i]) {
-      console.log('next i=' + (i + 1));
-      return each(items, callback, i + 1);
-//      }
-    });
-  }
-  console.log('*****end of items');
-  return new Promise(function (resolve) { resolve(); }); // TODO: best way?
-}
-
-// function each(items, callback, i) {
-//   console.log('i=' + i);
-//   if (items[i]) {
-//     console.log('exists! title: ' + items[i].doc.title);
-//     return callback(items[i]).then(function () {
-// //      if (items[i]) {
-//       console.log('next i=' + (i + 1));
-//       return each(items, callback, i + 1);
-// //      }
-//     });
-//   }
-//   console.log('*****end of items');
-//   return new Promise(function (resolve) { resolve(); }); // TODO: best way?
-// }
-
-// function each(items, callback, i) {
-//   if (items[i]) {
-//     console.log('i= ' + i + ': exists!');
-//     return callback(items[i]).then(function () {
-// //      if (items[i]) {
-//       // console.log('next i=' + (i + 1));
-//       return each(items, callback, ++i);
-// //      }
-//     });
-//   }
-//   console.log('*****end of items');
-//   return new Promise(function (resolve) { resolve(); }); // TODO: best way?
-// }
 
 // TODO: also create fn like noBufferCleanup that uses REST to cleanup??
 //       This way can use timestamp so not cleaning same range each time
@@ -358,52 +199,16 @@ exports.cleanup = function () {
       return a.doc.$createdAt < b.doc.$createdAt;
     });
 
-    console.log('cleanup docs=');
-    console.log(doc.rows);
-
     return each(doc.rows, function (el) {
       return cleanupDoc(db, el, docs, deletions);
     }, 0).then(function () {
-      console.log('after reduces');
       if (!empty(deletions)) {
-        console.log('removeDeletions');
         return removeDeletions(db, doc, deletions);
       }
     });
 
   });
 };
-
-// // TODO: also create fn like noBufferCleanup that uses REST to cleanup??
-// //       This way can use timestamp so not cleaning same range each time
-// exports.cleanup = function () {
-//   var db = this;
-//   return db.allDocs({ include_docs: true }).then(function (doc) {
-
-//     var docs = {}, deletions = {}, promises = [];
-
-//     // reverse sort by createdAt
-//     doc.rows.sort(function (a, b) {
-//       return a.doc.$createdAt < b.doc.$createdAt;
-//     });
-
-//     console.log('cleanup docs=');
-//     console.log(doc.rows);
-
-//     doc.rows.forEach(function (el) {
-//       promises.push(cleanupDoc(db, el, docs, deletions));
-//     });
-//     console.log('cleanup num promises = ' + promises.length);
-//     return Promise.all(promises).then(function () {
-//       console.log('after reduces');
-//       if (!empty(deletions)) {
-//         console.log('removeDeletions');
-//         return removeDeletions(db, doc, deletions);
-//       }
-//     });
-
-//   });
-// };
 
 /* istanbul ignore next */
 if (typeof window !== 'undefined' && window.PouchDB) {
