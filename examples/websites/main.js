@@ -144,10 +144,10 @@ db.all().then(function (docs) {
 
 // NOTE: this function does not cause the UI to update. It is provided only for testing purposes.
 function purge() {
-  return new Promise(function (fulfill) {
+  return new Promise(function (resolve) {
     var promises = [], done = function () {
       console.log('purge done');
-      fulfill();
+      resolve();
     };
     db.allDocs({include_docs: true}, function (err, doc) {
       if (!doc || doc.rows.length === 0) {
