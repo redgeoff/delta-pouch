@@ -65,10 +65,7 @@
 
   db.all().then(function (docs) {
     if (docs) {
-      var doc = first(docs);
-      if (doc) {
-        profile = doc;
-      }
+      profile = first(docs);
       display();
     }
 
