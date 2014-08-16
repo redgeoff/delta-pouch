@@ -193,7 +193,7 @@ function cleanupDoc(db, el, docs, deletions) {
 //       This way can use timestamp so not cleaning same range each time
 exports.cleanup = function () {
   var db = this;
-  return db.allDocs({ include_docs: true }, function (err, doc) {
+  return db.allDocs({ include_docs: true }).then(function (doc) {
 
     var docs = {}, deletions = {};
 

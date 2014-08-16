@@ -53,7 +53,7 @@ function tests(dbName, dbType) {
 
   describe(dbType + ': delta test suite', function () {
 
-    this.timeout(5000);
+    // this.timeout(5000);
 
     it('should clone', function () {
       var doc = { title: 'take out trash', priority: 'low' }, clonedDoc = db.clone(doc);
@@ -165,7 +165,9 @@ function tests(dbName, dbType) {
 
     function cleanup() {
       return db.cleanup().then(function () {
-        return db.allDocs({ include_docs: true }, function (err, doc) {
+        console.log('a');
+        return db.allDocs({ include_docs: true }).then(function (doc) {
+          console.log('b');
           doc.rows.sort(function (a, b) {
             return a.doc.$createdAt > b.doc.$createdAt;
           });
@@ -180,7 +182,9 @@ function tests(dbName, dbType) {
 
     it('should cleanup updates and be reflected in all', function () {
       return saveTrash().then(function (dishesId) {
+        console.log('1');
         return cleanup().then(function (doc) {
+          console.log('2');
           assertContains(doc.rows[0].doc,
             { $id: dishesId, title: 'take out trash and recycling' });
           assertContains(doc.rows[1].doc,
