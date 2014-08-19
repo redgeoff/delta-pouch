@@ -3,12 +3,25 @@
 var utils = require('./pouch-utils'); // TODO: is it ok that this causes warnings with uglifyjs??
 var Promise = utils.Promise;
 
+var events = require('events');
+
 function empty(obj) {
   for (var i in obj) { // jshint unused:false
     return false;
   }
   return true;
 }
+
+exports.delta = new events.EventEmitter();
+
+exports.deltaInit = function () {
+  this.on('create', function (object) {
+    onCreate(this, object);
+  });
+  this.on('destroyed', function () {
+    onDestroyed(this);
+  });
+};
 
 exports.clone = function (obj) {
   return JSON.parse(JSON.stringify(obj));
@@ -68,30 +81,36 @@ exports.all = function () {
   });
 };
 
-// TODO: refactor to use events like pouch, e.g. on('update', cb)??
-// TODO: create a more customizable construct for deletions, e.g. deletions.wasDeleted(),
-//       deletions.setDeleted()??
-exports.onCreate = function (object, getItem, deletions, onCreate, onUpdate, onDelete) {
-  var db = this;
+var deletions = {};
+
+exports.wasDeleted = function (id) {
+  return deletions[id] ? true : false;
+};
+
+exports.markDeletion = function (id) {
+  deletions[id] = true;
+};
+
+function onCreate(db, object) {
   db.get(object.id).then(function (doc) {
-    doc.$id = doc.$id ? doc.$id : doc._id;
-    if (!deletions[doc.$id]) { // not previously deleted?
-      var item = getItem(doc.$id);
-      if (item) { // existing?
-        if (doc.$deleted) { // deleted?
-          deletions[doc.$id] = true;
-          onDelete(doc.$id);
-        } else {
-          onUpdate(db.merge(item, doc));
-        }
-      } else if (doc.$deleted) { // deleted?
-        deletions[doc.$id] = true;
+    var id = doc.$id ? doc.$id : doc._id;
+    if (!exports.wasDeleted(id)) { // not previously deleted?
+      if (doc.$deleted) { // deleted?
+        exports.markDeletion(id);
+        exports.delta.emit('delete', id);
+      } else if (doc.$id) { // update?
+        exports.delta.emit('update', doc);
       } else {
-        onCreate(doc);
+        doc.$id = id;
+        exports.delta.emit('create', doc);
       }
     }
   });
-};
+}
+
+function onDestroyed(db) {
+  db.delta.removeAllListeners();
+}
 
 function getChanges(item, updates) {
   var changes = {}, change = false;

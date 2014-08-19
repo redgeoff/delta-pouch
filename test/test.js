@@ -72,25 +72,6 @@ function tests(dbName, dbType) {
 
     // this.timeout(5000);
 
-    it('should clone', function () {
-      var doc = { title: 'take out trash', priority: 'low' }, clonedDoc = db.clone(doc);
-      clonedDoc.title = 'clean dishes';
-      doc.title.should.eql('take out trash');
-    });
-
-    it('should save', function () {
-      var doc = { title: 'take out trash', priority: 'low' };
-      return save(doc).then(function (response) {
-        response.should.eql({ ok: true, id: response.id, rev: response.rev});
-      });
-    });
-
-    it('should delete', function () {
-      return db.delete(123).then(function (response) {
-        response.should.eql({ ok: true, id: response.id, rev: response.rev});
-      });
-    });
-
     function saveTrash() {
       return save({ title: 'take out trash' }).then(function (doc) {
         return save({ $id: doc.id, priority: 'medium' }).then(function () {
@@ -118,8 +99,25 @@ function tests(dbName, dbType) {
       }
     }
 
-    function failure() {
-      '1'.should.equal('2');
+    function AssertFunctionFactory(callback, resolve, reject) {
+      return function () {
+        try {
+          // monkey-patch
+          callback.apply(this, arguments);
+          resolve();
+        } catch (err) {
+          reject(err);
+        }
+      };
+    }
+
+    function AssertNeverFactory(resolve, reject, name) {
+      setTimeout(function () {
+        resolve();
+      }, 500);
+      return function () {
+        reject(new Error(name + ' should never be called'));
+      };
     }
 
     function saveDishes() {
@@ -151,6 +149,36 @@ function tests(dbName, dbType) {
       });
     }
 
+    function cleanup() {
+      return db.cleanup().then(function () {
+        return db.allDocs({ include_docs: true }).then(function (doc) {
+          doc.rows.sort(function (a, b) {
+            return a.doc.$createdAt > b.doc.$createdAt;
+          });
+          return doc;
+        });
+      });
+    }
+
+    it('should clone', function () {
+      var doc = { title: 'take out trash', priority: 'low' }, clonedDoc = db.clone(doc);
+      clonedDoc.title = 'clean dishes';
+      doc.title.should.eql('take out trash');
+    });
+
+    it('should save', function () {
+      var doc = { title: 'take out trash', priority: 'low' };
+      return save(doc).then(function (response) {
+        response.should.eql({ ok: true, id: response.id, rev: response.rev});
+      });
+    });
+
+    it('should delete', function () {
+      return db.delete(123).then(function (response) {
+        response.should.eql({ ok: true, id: response.id, rev: response.rev});
+      });
+    });
+
     it('all should call callback even when no docs', function () {
       return db.all().then(function (docs) {
         docs.should.deep.equal({});
@@ -179,17 +207,6 @@ function tests(dbName, dbType) {
     it('should delete doc and be reflected in all', function () {
       return deleteTrash();
     });
-
-    function cleanup() {
-      return db.cleanup().then(function () {
-        return db.allDocs({ include_docs: true }).then(function (doc) {
-          doc.rows.sort(function (a, b) {
-            return a.doc.$createdAt > b.doc.$createdAt;
-          });
-          return doc;
-        });
-      });
-    }
 
     it('should cleanup when no docs', function () {
       return db.cleanup();
@@ -254,100 +271,77 @@ function tests(dbName, dbType) {
     });
 
     it('should save no changes', function () {
-      var item = { $id: 1, title: 'take out trash', priority: 'high'},
-          updates = {};
+      var item = { $id: 1, title: 'take out trash', priority: 'high'}, updates = {};
       return db.saveChanges(item, updates);
     });
 
-    it('should onCreate onCreate', function () {
+    it('should emit create', function () {
       var item = { title: 'take out trash' };
-      return save(item).then(function (object) {
-        var deletions = {};
-        function getItem() {
-          return null;
-        }
-        function onCreate(doc) {
-          assertContains(doc, { $id: object.id, title: item.title });
-        }
-        db.onCreate(object, getItem, deletions, onCreate);
+      db.deltaInit();
+      var promise = new Promise(function (resolve, reject) {
+        db.delta.on('create', new AssertFunctionFactory(function (doc) {
+          assertContains(doc, { $id: doc.$id });
+        }, resolve, reject));
       });
+      save(item);
+      return promise;
     });
 
-    it('should onCreate onCreate ignore deletions', function () {
-      var item = { title: 'take out trash' };
-      return save(item).then(function (object) {
-        var deletions = {};
-        deletions[object.id] = true;
-        function getItem() {
-          return null;
-        }
-        function onCreate() {
-          failure();
-        }
-        db.onCreate(object, getItem, deletions, onCreate);
-      });
-    });
-
-    it('should onCreate onUpdate', function () {
-      var item1 = { title: 'take out trash' };
-      return save(item1).then(function (object1) {
-        var item2 = { $id: object1.id, title: 'take out recycling' };
-        return save(item2).then(function (object2) {
-          var deletions = {};
-          function getItem() {
-            return { $id: object1.id, title: item1.title };
-          }
-          function onUpdate(doc) {
-            assertContains(doc, { $id: item2.$id, title: item2.title });
-          }
-          db.onCreate(object2, getItem, deletions, null, onUpdate);
+    it('should not emit create when already deleted', function () {
+      return saveTrash().then(function (trashId) {
+        return db.delete(trashId).then(function () {
+          var item = { $id: trashId, title: 'put out trash cans' };
+          db.deltaInit();
+          var promise = new Promise(function (resolve, reject) {
+            db.delta.on('create', new AssertNeverFactory(resolve, reject));
+          });
+          save(item);
+          return promise;
         });
       });
     });
 
-    it('should onCreate onUpdate ignore deletions', function () {
-      var item = { title: 'take out trash' };
-      return save(item).then(function (object) {
-        var deletions = {};
-        deletions[object.id] = true;
-        function getItem() {
-          return { $id: object.id, title: item.title };
-        }
-        function onUpdate() {
-          failure();
-        }
-        db.onCreate(object, getItem, deletions, null, onUpdate);
+    it('should emit update', function () {
+      var item1 = { title: 'take out trash' };
+      return save(item1).then(function (object1) {
+        var item2 = { $id: object1.id, title: 'take out recycling' };
+        db.deltaInit();
+        var promise = new Promise(function (resolve, reject) {
+          db.delta.on('update', new AssertFunctionFactory(function (doc) {
+            assertContains(doc, item2);
+          }, resolve, reject));
+        });
+        save(item2);
+        return promise;
       });
     });
 
-    it('should onCreate onDelete', function () {
-      var item = { $deleted: true };
-      return save(item).then(function (object) {
-        var deletions = {};
-        function getItem() {
-          return { $id: object.id, title: item.title };
-        }
-        function onDelete(id) {
-          id.should.equal(object.id);
-          var dels = {};
-          dels[id] = true;
-          assertContains(deletions, dels);
-        }
-        db.onCreate(object, getItem, deletions, null, null, onDelete);
+    it('should not emit update when already deleted', function () {
+      return saveTrash().then(function (trashId) {
+        db.deltaInit();
+        return db.delete(trashId).then(function () {
+          return new Promise(function (resolve, reject) {
+            // wait for the deletion to be marked before performing the update
+            db.delta.on('delete', function () {
+              var item = { $id: trashId, title: 'put out trash cans' };
+              db.delta.on('update', new AssertNeverFactory(resolve, reject, 'update'));
+              save(item);
+            });
+          });
+        });
       });
     });
 
-    it('should onCreate onDelete no item', function () {
-      var item = { $deleted: true };
-      return save(item).then(function (object) {
-        var deletions = {};
-        function getItem() {
-          return null;
-        }
-        function onDelete() {
-          failure();
-        }
-        db.onCreate(object, getItem, deletions, null, null, onDelete);
+    it('should emit delete', function () {
+      return saveTrash().then(function (trashId) {
+        db.deltaInit();
+        var promise = new Promise(function (resolve, reject) {
+          db.delta.on('delete', new AssertFunctionFactory(function (id) {
+            id.should.equal(trashId);
+          }, resolve, reject));
+        });
+        db.delete(trashId);
+        return promise;
       });
     });
 
