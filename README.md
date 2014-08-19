@@ -43,14 +43,14 @@ To use this plugin, include it after `pouchdb.js` in your HTML page:
 Or to use it in Node.js, just npm install it:
 
 ```
-npm install pouchdb-delta-pouch
+npm install delta-pouch
 ```
 
 And then attach it to the `PouchDB` object:
 
 ```js
 var PouchDB = require('pouchdb');
-PouchDB.plugin(require('pouchdb-delta-pouch'));
+PouchDB.plugin(require('delta-pouch'));
 ```
 
 More Examples:
@@ -96,8 +96,7 @@ Running the included examples
 Note: you must have couchdb installed and Admin Party enabled
 
     npm install
-    npm run build
-    npm run dev-server
+    npm run dev
 
 Visit the target example in your browser, e.g. http://127.0.0.1:8001/examples/websites
 
