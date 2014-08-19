@@ -1,6 +1,6 @@
 {
   "name": "delta-pouch",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A PouchDB plugin for collaborative editing of docs",
   "main": "index.js",
   "repository": {
@@ -54,10 +54,8 @@
     "sauce-connect-launcher": "^0.4.2",
     "uglify-js": "^2.4.13",
     "watchify": "~0.4.1",
-    "wd": "^0.2.21"
-  },
-  "peerDependencies": {
-    "pouchdb": ">= 2.2.0"
+    "wd": "^0.2.21",
+    "events": "*"
   },
   "browser": {
     "crypto": false
