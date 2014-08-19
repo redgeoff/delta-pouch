@@ -1152,34 +1152,8 @@ exports.merge = function (obj1, obj2) {
   return merged;
 };
 
-<<<<<<< HEAD
-// Note: this function is roughly compatible with bluebirdjs's reduce
-function reduce(items, reducer, i) {
-  return new Promise(function (fulfill) {
-    if (items[i]) {
-      reducer(null, items[i], i, items.length).then(function () {
-        reduce(items, reducer, i + 1).then(fulfill);
-      });
-    } else {
-      fulfill();
-    }
-  });
-}
-
 function save(db, doc) {
   doc.$createdAt = (new Date()).toJSON();
-  return new Promise(function (fulfill) {
-    db.post(doc).then(function (doc) {
-      fulfill(doc);
-    });
-  });
-=======
-function save(db, doc) {
-  doc.$createdAt = (new Date()).toJSON();
-<<<<<<< HEAD
-  return db.post(doc);
->>>>>>> master
-=======
   if (doc.$id) { // update?
     // this format guarantees the docs will be retrieved in order they were created
     doc._id = doc.$id + '_' + doc.$createdAt;
@@ -1187,7 +1161,6 @@ function save(db, doc) {
   } else { // new
     return db.post(doc);
   }
->>>>>>> master
 }
 
 exports.save = function (doc) {
@@ -1204,46 +1177,6 @@ exports["delete"] = function (docOrId) {
 
 exports.all = function () {
   var db = this;
-<<<<<<< HEAD
-  return new Promise(function (fulfill) {
-    var docs = {},
-        deletions = {};
-    db.allDocs({include_docs: true}, function (err, doc) {
-
-      if (doc.rows.length === 0) {
-        fulfill();
-        return;
-      }
-
-      // sort by createdAt as cannot guarantee that order preserved by pouch/couch
-      doc.rows.sort(function (a, b) {
-        return a.doc.$createdAt > b.doc.$createdAt;
-      });
-
-      doc.rows.forEach(function (el, i) {
-        if (!el.doc.$id) { // first delta for doc?
-          el.doc.$id = el.doc._id;
-        }
-        if (el.doc.$deleted) { // deleted?
-          delete(docs[el.doc.$id]);
-          deletions[el.doc.$id] = true;
-        } else if (!deletions[el.doc.$id]) { // update before any deletion?
-          if (docs[el.doc.$id]) { // exists?
-            docs[el.doc.$id] = exports.merge(docs[el.doc.$id], el.doc);
-          } else {
-            docs[el.doc.$id] = el.doc;
-          }
-        }
-        if (i === doc.rows.length - 1) { // last element?
-          fulfill(docs);
-        }
-      });
-    });
-  });
-};
-
-// TODO: refactor to use a events like pouch, e.g. on('update', cb)??
-=======
   var docs = {},
     deletions = {};
   return db.allDocs({include_docs: true}).then(function (doc) {
@@ -1266,14 +1199,6 @@ exports.all = function () {
   });
 };
 
-<<<<<<< HEAD
-// TODO: refactor to use events like pouch, e.g. on('update', cb)??
->>>>>>> master
-// TODO: create a more customizable construct for deletions, e.g. deletions.wasDeleted(),
-//       deletions.setDeleted()??
-exports.onCreate = function (object, getItem, deletions, onCreate, onUpdate, onDelete) {
-  var db = this;
-=======
 var deletions = {};
 
 exports.wasDeleted = function (id) {
@@ -1285,7 +1210,6 @@ exports.markDeletion = function (id) {
 };
 
 function onCreate(db, object) {
->>>>>>> master
   db.get(object.id).then(function (doc) {
     var id = doc.$id ? doc.$id : doc._id;
     if (!exports.wasDeleted(id)) { // not previously deleted?
@@ -1317,28 +1241,6 @@ function getChanges(item, updates) {
   return change ? changes : null;
 }
 
-<<<<<<< HEAD
-exports.saveChanges = function (item, updates, onChange) {
-  var db = this, changes = getChanges(item, updates); // afterwards, item contains the updates
-  if (changes !== null) {
-    changes.$id = item.$id;
-    db.save(changes).then(function () {
-      onChange(item);
-    });
-  }
-};
-
-function getAndRemove(db, id) {
-  return new Promise(function (fulfill) {
-    db.get(id).then(function (object) {
-      db.remove(object).then(fulfill);
-    })["catch"](function () { // not found?
-      fulfill();
-    });
-  });
-}
-
-=======
 exports.saveChanges = function (item, updates) {
   var db = this, changes = getChanges(item, updates);
   if (changes !== null) {
@@ -1366,61 +1268,12 @@ exports.getAndRemove = function (id) {
   return getAndRemove(this, id);
 };
 
->>>>>>> master
 /*
  * We need a second pass for deletions as client 1 may delete and then
  * client 2 updates afterwards
  * e.g. {id: 1, title: 'one'}, {$id: 1, $deleted: true}, {$id: 1, title: 'two'}
  */
 function removeDeletions(db, doc, deletions) {
-<<<<<<< HEAD
-  return new Promise(function (fulfill) {
-    var promises = [];
-    doc.rows.forEach(function (el, i) {
-      if (deletions[el.doc.$id]) { // deleted?
-        promises.push(getAndRemove(db, el.id));
-      }
-      if (i === doc.rows.length - 1) { // last element?
-        // promise shouldn't fulfill until all deletions have completed
-        Promise.all(promises).then(fulfill);
-      }
-    });
-  });
-}
-
-function cleanupDoc(db, el, docs, deletions) {
-  return new Promise(function (fulfill) {
-    db.get(el.doc._id).then(function (object) {
-      var promises = [];
-
-      if (!el.doc.$id) { // first delta for doc?
-        el.doc.$id = el.doc._id;
-      }
-
-      if (el.doc.$deleted || deletions[el.doc.$id]) { // deleted?
-        deletions[el.doc.$id] = true;
-        promises.push(db.remove(object));
-      } else if (docs[el.doc.$id]) { // exists?
-        var undef = false;
-        for (var k in el.doc) {
-          if (typeof docs[el.doc.$id][k] === 'undefined') {
-            undef = true;
-            break;
-          }
-        }
-        if (undef) {
-          docs[el.doc.$id] = exports.merge(docs[el.doc.$id], el.doc);
-        } else { // duplicate update, remove
-          promises.push(db.remove(object));
-        }
-      } else {
-        docs[el.doc.$id] = el.doc;
-      }
-
-      // promise shouldn't fulfill untill all deletions have completed
-      Promise.all(promises).then(fulfill);
-    });
-=======
   var promises = [];
   doc.rows.forEach(function (el) {
     if (deletions[el.doc.$id]) { // deleted?
@@ -1457,7 +1310,6 @@ function cleanupDoc(db, el, docs, deletions) {
     } else {
       docs[el.doc.$id] = el.doc;
     }
->>>>>>> master
   });
 }
 
@@ -1465,36 +1317,6 @@ function cleanupDoc(db, el, docs, deletions) {
 //       This way can use timestamp so not cleaning same range each time
 exports.cleanup = function () {
   var db = this;
-<<<<<<< HEAD
-  return new Promise(function (fulfill) {
-    db.allDocs({ include_docs: true }, function (err, doc) {
-
-      var docs = {}, deletions = {};
-
-      // reverse sort by createdAt
-      doc.rows.sort(function (a, b) {
-        return a.doc.$createdAt < b.doc.$createdAt;
-      });
-
-      return reduce(doc.rows, function (total, current) {
-        return cleanupDoc(db, current, docs, deletions);
-      }, 0).then(function () {
-        if (empty(deletions)) {
-          fulfill();
-        } else {
-          removeDeletions(db, doc, deletions).then(fulfill);
-        }
-      });
-
-    });
-  });
-};
-
-// TESTS: what if client 1 deletes, client 2 updates afterwards???
-//   {id: 1, title: 'one'}, {$id: 1, $deleted: true}, {$id: 1, title: 'two'}
-//   Also need to worry about this when get change event
-
-=======
   return db.allDocs({ include_docs: true }).then(function (doc) {
 
     var docs = {}, deletions = {}, chain = Promise.resolve();
@@ -1518,7 +1340,6 @@ exports.cleanup = function () {
   });
 };
 
->>>>>>> master
 /* istanbul ignore next */
 if (typeof window !== 'undefined' && window.PouchDB) {
   window.PouchDB.plugin(exports);
