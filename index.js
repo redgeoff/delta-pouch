@@ -40,7 +40,13 @@ exports.merge = function (obj1, obj2) {
 
 function save(db, doc) {
   doc.$createdAt = (new Date()).toJSON();
-  return db.post(doc);
+  if (doc.$id) { // update?
+    // this format guarantees the docs will be retrieved in order they were created
+    doc._id = doc.$id + '_' + doc.$createdAt;
+    return db.put(doc);
+  } else { // new
+    return db.post(doc);
+  }
 }
 
 exports.save = function (doc) {
@@ -56,12 +62,6 @@ exports.all = function () {
   var docs = {},
     deletions = {};
   return db.allDocs({include_docs: true}).then(function (doc) {
-
-    // sort by createdAt as cannot guarantee that order preserved by pouch/couch
-    doc.rows.sort(function (a, b) {
-      return a.doc.$createdAt > b.doc.$createdAt;
-    });
-
     doc.rows.forEach(function (el) {
       if (!el.doc.$id) { // first delta for doc?
         el.doc.$id = el.doc._id;
