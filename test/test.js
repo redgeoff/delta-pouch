@@ -132,10 +132,10 @@ function tests(dbName, dbType) {
       });
     }
 
-    function deleteTrash() {
+    function deleteTrash(useDoc) {
       return saveTrash().then(function (trashId) {
         return saveDishes().then(function (dishesId) {
-          return db.delete(trashId).then(function () {
+          return db.delete(useDoc ? { $id: dishesId } : trashId).then(function () {
             // save after delete shouldn't change docs
             return save({ $id: trashId, title: 'replace trash bag' }).then(function () {
               var docs = {};
@@ -177,6 +177,18 @@ function tests(dbName, dbType) {
       return db.delete(123).then(function (response) {
         response.should.eql({ ok: true, id: response.id, rev: response.rev});
       });
+    });
+
+    it('should delete with doc', function () {
+      return deleteTrash(true);
+    });
+
+    it('delete should throw error when no $id', function (done) {
+      try {
+        db.delete({});
+      } catch (err) {
+        done();
+      }
     });
 
     it('all should call callback even when no docs', function () {
