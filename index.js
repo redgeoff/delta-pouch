@@ -118,18 +118,17 @@ function getChanges(item, updates) {
     if (item[i] !== updates[i]) {
       change = true;
       changes[i] = updates[i];
-      item[i] = updates[i];
     }
   }
   return change ? changes : null;
 }
 
 exports.saveChanges = function (item, updates) {
-  var db = this, changes = getChanges(item, updates); // afterwards, item contains the updates
+  var db = this, changes = getChanges(item, updates);
   if (changes !== null) {
     changes.$id = item.$id;
     return db.save(changes).then(function () {
-      return item;
+      return changes;
     });
   }
   return Promise.resolve();

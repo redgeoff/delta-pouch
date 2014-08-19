@@ -263,7 +263,7 @@ function tests(dbName, dbType) {
       return db.saveChanges(item, updates).then(function (response) {
         (typeof response).should.not.equal('undefined');
         assertContains(response,
-          { $id: item.$id, title: updates.title, priority: item.priority });
+          { $id: item.$id, title: updates.title });
         var docs = {};
         docs[item.$id] = { $id: item.$id, title: updates.title };
         return assertAllDocs(docs);
