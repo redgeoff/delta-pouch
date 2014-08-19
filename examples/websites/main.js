@@ -3,7 +3,7 @@
 /* exported doPurge, editSite, removeSite, saveSite, cleanup */
 /* global PouchDB, Promise */
 
-var sites = [], curSite = null, deletions = {}, db = new PouchDB('websites'),
+var sites = [], curSite = null, db = new PouchDB('websites'),
     remoteCouch = (location.search ? 'https://delta-pouch.iriscouch.com'
       : 'http://127.0.0.1:5984') + '/websites';
 
@@ -77,7 +77,8 @@ function addSiteAndItem(site) {
   addItem(site);
 }
 
-function updateSiteAndItem(site) {
+function updateSiteAndItem(changes) {
+  var site = db.merge(getSite(changes.$id), changes);
   updateSite(site);
   updateItem(site);
 }
@@ -93,22 +94,15 @@ function editSite(id) {
 }
 
 function removeSite(id) {
-  db.delete(id).then(function () {
-    deleteSiteAndItem(id);
-  });
+  db.delete(id);
 }
 
 function saveChanges() {
-  db.saveChanges(curSite, getFormValues()).then(function (newSite) {
-    updateItem(newSite);      
-  });
+  db.saveChanges(curSite, getFormValues());
 }
 
 function saveNew() {
-  db.save(getFormValues()).then(function (site) {
-    site.$id = site.id;
-    addSiteAndItem(site);
-  });
+  db.save(getFormValues());
 }
 
 function saveSite() {
@@ -120,16 +114,18 @@ function saveSite() {
   setFormVisible(false);
 }
 
-function onCreate(object) {
-  db.onCreate(object, getSite, deletions, addSiteAndItem, updateSiteAndItem, deleteSiteAndItem);
-}
+db.deltaInit();
+
+db.delta
+  .on('create', addSiteAndItem)
+  .on('update', updateSiteAndItem)
+  .on('delete', deleteSiteAndItem);
 
 db.info(function (err, info) {
   db.changes({
-      since: info.update_seq,
-      live: true
-    })
-    .on('create', onCreate);
+    since: info.update_seq,
+    live: true
+  });
 });
 
 var opts = { live: true };
