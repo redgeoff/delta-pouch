@@ -12,6 +12,18 @@ function empty(obj) {
   return true;
 }
 
+function isString(obj) {
+  return typeof obj === 'string' || obj instanceof String;
+}
+
+function isNumeric(obj) {
+  return !isNaN(obj);
+}
+
+function notDefined(obj) {
+  return typeof obj === 'undefined';
+}
+
 exports.delta = new events.EventEmitter();
 
 exports.deltaInit = function () {
@@ -53,7 +65,11 @@ exports.save = function (doc) {
   return save(this, doc);
 };
 
-exports.delete = function (id) {
+exports.delete = function (docOrId) {
+  var id = isString(docOrId) || isNumeric(docOrId) ? docOrId : docOrId.$id;
+  if (notDefined(id)) {
+    throw new Error('missing $id');
+  }
   return save(this, {$id: id, $deleted: true});
 };
 
