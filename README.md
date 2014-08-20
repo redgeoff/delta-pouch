@@ -91,6 +91,30 @@ db.cleanup().then(function () {
 ```
 Delta pouch stores every change as a doc. The cleanup() function removes any changes that are no longer needed and should probably be run via a periodic background process like a node cron job. It is not necessary to use the cleanup() function, but it is advisable as it reduces unneeded syncing and data storage.
 
+**Listen for events**
+```js
+db.deltaInit();
+db.delta
+  .on('create', function (doc) {
+    // e.g. doc = { $id: 123, url: 'google.com', views: 0  }
+  })
+  .on('update', function (changes) {
+    // e.g. changes = { $id: 123, views: 1  }
+  })
+  .on('delete', function (id) {
+    // e.g. id = 123
+  });
+```
+
+**Save changes**
+```js
+var oldDoc = { $id: 123, url: 'google.com', views: 0 };
+var newDoc = { url: 'google.com', views: 1 };
+db.saveChanges(oldDoc, newDoc).then(function (changes) {
+  // changes = { $id: 123, views: 1 };
+});
+```
+
 Running the included examples
 ----
 Note: you must have couchdb installed and Admin Party enabled
