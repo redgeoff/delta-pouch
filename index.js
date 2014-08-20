@@ -55,7 +55,13 @@ function save(db, doc) {
   if (doc.$id) { // update?
     // this format guarantees the docs will be retrieved in order they were created
     doc._id = doc.$id + '_' + doc.$createdAt;
-    return db.put(doc);
+    return db.put(doc).catch(/* istanbul ignore next */ function (err) {
+      // It appears there is a bug in pouch that causes a doc conflict even though we are creating a
+      // new doc
+      if (err.status !== 409) {
+        throw err;
+      }
+    });
   } else { // new
     return db.post(doc);
   }
