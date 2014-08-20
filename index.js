@@ -128,21 +128,21 @@ function onDestroyed(db) {
   db.delta.removeAllListeners();
 }
 
-function getChanges(item, updates) {
+function getChanges(oldDoc, newDoc) {
   var changes = {}, change = false;
-  for (var i in updates) {
-    if (item[i] !== updates[i]) {
+  for (var i in newDoc) {
+    if (oldDoc[i] !== newDoc[i]) {
       change = true;
-      changes[i] = updates[i];
+      changes[i] = newDoc[i];
     }
   }
   return change ? changes : null;
 }
 
-exports.saveChanges = function (item, updates) {
-  var db = this, changes = getChanges(item, updates);
+exports.saveChanges = function (oldDoc, newDoc) {
+  var db = this, changes = getChanges(oldDoc, newDoc);
   if (changes !== null) {
-    changes.$id = item.$id;
+    changes.$id = oldDoc.$id;
     return db.save(changes).then(function () {
       return changes;
     });
