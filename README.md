@@ -15,7 +15,7 @@ var db = new PouchDB('pages');
 db.save({ url: 'google.com', views: 0 }).then(function (doc) {
   // Update only the views attribute
   db.save({
-    $id: doc.id, // Set the id
+    $id: doc.$id, // Set the id
     views: 1 });
 });
 ```
@@ -68,6 +68,8 @@ db.save({ url: 'google.com', views: 0 }).then(function (doc) {
 db.save({
     $id: doc.$id, // id from creation
     views: 1 });
+}).then(function (item) {
+  // item.$id is the id of the updated doc, i.e. item.$id = doc.$id
 });
 ```
 
