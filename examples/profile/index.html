@@ -36,10 +36,7 @@
       updates.$id = profile.$id;
     }
     updates[document.getElementById('attr').value] = document.getElementById('value').value;
-    db.save(updates).then(function (doc) {
-      updates = db.merge(updates, doc);
-      onChange(updates);
-    });
+    db.save(updates);
     document.getElementById('value').value = '';
   }
 

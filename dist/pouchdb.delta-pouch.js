@@ -1157,7 +1157,13 @@ function save(db, doc) {
   if (doc.$id) { // update?
     // this format guarantees the docs will be retrieved in order they were created
     doc._id = doc.$id + '_' + doc.$createdAt;
-    return db.put(doc);
+    return db.put(doc)["catch"](/* istanbul ignore next */ function (err) {
+      // It appears there is a bug in pouch that causes a doc conflict even though we are creating a
+      // new doc
+      if (err.status !== 409) {
+        throw err;
+      }
+    });
   } else { // new
     return db.post(doc);
   }
@@ -1230,21 +1236,21 @@ function onDestroyed(db) {
   db.delta.removeAllListeners();
 }
 
-function getChanges(item, updates) {
+function getChanges(oldDoc, newDoc) {
   var changes = {}, change = false;
-  for (var i in updates) {
-    if (item[i] !== updates[i]) {
+  for (var i in newDoc) {
+    if (oldDoc[i] !== newDoc[i]) {
       change = true;
-      changes[i] = updates[i];
+      changes[i] = newDoc[i];
     }
   }
   return change ? changes : null;
 }
 
-exports.saveChanges = function (item, updates) {
-  var db = this, changes = getChanges(item, updates);
+exports.saveChanges = function (oldDoc, newDoc) {
+  var db = this, changes = getChanges(oldDoc, newDoc);
   if (changes !== null) {
-    changes.$id = item.$id;
+    changes.$id = oldDoc.$id;
     return db.save(changes).then(function () {
       return changes;
     });
