@@ -169,13 +169,13 @@ function tests(dbName, dbType) {
     it('should save', function () {
       var doc = { title: 'take out trash', priority: 'low' };
       return save(doc).then(function (response) {
-        response.should.eql({ ok: true, id: response.id, rev: response.rev});
+        response.should.eql({ ok: true, id: response.id, rev: response.rev, $id: response.$id });
       });
     });
 
     it('should delete', function () {
       return db.delete(123).then(function (response) {
-        response.should.eql({ ok: true, id: response.id, rev: response.rev});
+        response.should.eql({ ok: true, id: response.id, rev: response.rev, $id: response.$id});
       });
     });
 
