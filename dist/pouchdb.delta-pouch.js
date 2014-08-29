@@ -1157,7 +1157,10 @@ function save(db, doc) {
   if (doc.$id) { // update?
     // this format guarantees the docs will be retrieved in order they were created
     doc._id = doc.$id + '_' + doc.$createdAt;
-    return db.put(doc)["catch"](/* istanbul ignore next */ function (err) {
+    return db.put(doc).then(function (response) {
+      response.$id = doc.$id;
+      return response;
+    })["catch"](/* istanbul ignore next */ function (err) {
       // It appears there is a bug in pouch that causes a doc conflict even though we are creating a
       // new doc
       if (err.status !== 409) {
@@ -1165,7 +1168,10 @@ function save(db, doc) {
       }
     });
   } else { // new
-    return db.post(doc);
+    return db.post(doc).then(function (response) {
+      response.$id = response.id;
+      return response;
+    });
   }
 }
 
