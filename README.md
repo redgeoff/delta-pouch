@@ -75,7 +75,9 @@ db.save({
 
 **Delete doc**
 ```js
-db.delete(doc.$id);
+db.delete(doc.$id).then(function (item) {
+  // item.$id is the id of the deleted doc
+});
 ```
 
 **Fetch all docs**
