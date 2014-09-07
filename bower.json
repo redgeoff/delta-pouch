@@ -1,0 +1,32 @@
+{
+  "name": "delta-pouch",
+  "main": "dist/pouchdb.delta-pouch.js",
+  "version": "0.1.4",
+  "homepage": "https://github.com/redgeoff/delta-pouch",
+  "authors": [
+    "Geoffrey Cox"
+  ],
+  "description": "A PouchDB plugin for collaborative editing of docs",
+  "moduleType": [
+    "node"
+  ],
+  "keywords": [
+    "pouch",
+    "pouchdb",
+    "plugin",
+    "delta",
+    "partial",
+    "updates",
+    "couch",
+    "couchdb"
+  ],
+  "license": "Apache",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests",
+    "vendor"
+  ]
+}
