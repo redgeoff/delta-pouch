@@ -51,6 +51,7 @@ exports.merge = function (obj1, obj2) {
 };
 
 function save(db, doc) {
+  delete(doc._rev); // delete any revision numbers copied from previous docs
   doc.$createdAt = (new Date()).toJSON();
   if (doc.$id) { // update?
     // this format guarantees the docs will be retrieved in order they were created
@@ -58,12 +59,6 @@ function save(db, doc) {
     return db.put(doc).then(function (response) {
       response.$id = doc.$id;
       return response;
-    }).catch(/* istanbul ignore next */ function (err) {
-      // It appears there is a bug in pouch that causes a doc conflict even though we are creating a
-      // new doc
-      if (err.status !== 409) {
-        throw err;
-      }
     });
   } else { // new
     return db.post(doc).then(function (response) {
