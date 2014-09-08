@@ -51,6 +51,7 @@ exports.merge = function (obj1, obj2) {
 };
 
 function save(db, doc) {
+  delete(doc._rev); // delete any revision numbers copied from previous docs
   doc.$createdAt = (new Date()).toJSON();
   if (doc.$id) { // update?
     // this format guarantees the docs will be retrieved in order they were created
