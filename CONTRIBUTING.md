@@ -47,6 +47,7 @@ This will run the tests automatically and the process will exit with a 0 or a 1 
 Build & Publish
 ----
 Let VERSION be the next version, something like 1.0.7
+
     tin -v VERSION
     npm run build
     git add -A
