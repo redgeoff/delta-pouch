@@ -1,12 +1,12 @@
 {
   "name": "delta-pouch",
+  "version": "0.1.5",
+  "description": "A PouchDB plugin for collaborative editing of docs",
   "main": "dist/pouchdb.delta-pouch.js",
-  "version": "0.1.4",
   "homepage": "https://github.com/redgeoff/delta-pouch",
   "authors": [
     "Geoffrey Cox"
   ],
-  "description": "A PouchDB plugin for collaborative editing of docs",
   "moduleType": [
     "node"
   ],
