@@ -29,10 +29,12 @@ function getItemHtml(site) {
 }
 
 function addItem(site) {
-  var siteList = document.getElementById('siteList'), li = document.createElement('li');
-  li.id = site.$id;
-  li.innerHTML = getItemHtml(site);
-  siteList.appendChild(li);
+  if (!document.getElementById(site.$id)) { // doesn't exist?
+    var siteList = document.getElementById('siteList'), li = document.createElement('li');
+    li.id = site.$id;
+    li.innerHTML = getItemHtml(site);
+    siteList.appendChild(li);
+  }
 }
 
 function updateItem(site) {
