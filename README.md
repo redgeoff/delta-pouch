@@ -128,6 +128,10 @@ Note: you must have couchdb installed and Admin Party enabled
 
 Visit the target example in your browser, e.g. http://127.0.0.1:8001/examples/websites
 
+Using Delta Pouch with angularjs
+----
+Check out [factoryng](https://github.com/redgeoff/factoryng), an all-in-one angularjs adapter that has great support for Delta Pouch!
+
 Contributing
 ----
 Interested in [contributing](CONTRIBUTING.md)?
