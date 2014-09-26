@@ -3,7 +3,7 @@ Delta Pouch
 
 [![Build Status](https://travis-ci.org/redgeoff/delta-pouch.svg)](https://travis-ci.org/redgeoff/delta-pouch)
 
-A PouchDB plugin for partial updates that uses the every-doc-is-a-delta storage pattern. You can use delta pouch to enable collaborative editing of the same docs.
+A PouchDB plugin for partial updates that uses the every-doc-is-a-delta storage pattern. You can use delta pouch to enable conflict-free collaborative editing of the same docs.
 
 Example
 ----

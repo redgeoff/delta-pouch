@@ -1,7 +1,7 @@
 {
   "name": "delta-pouch",
   "version": "0.1.6",
-  "description": "A PouchDB plugin for collaborative editing of docs",
+  "description": "Conflict-free collaborative editing for PouchDB",
   "main": "index.js",
   "repository": {
     "type": "git",
