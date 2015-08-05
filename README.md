@@ -67,7 +67,7 @@ db.save({ url: 'google.com', views: 0 }).then(function (doc) {
 ```js
 db.save({
     $id: doc.$id, // id from creation
-    views: 1 });
+    views: 1
 }).then(function (item) {
   // item.$id is the id of the updated doc, i.e. item.$id = doc.$id
 });
