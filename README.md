@@ -135,3 +135,8 @@ Check out [factoryng](https://github.com/redgeoff/factoryng), an all-in-one angu
 Contributing
 ----
 Interested in [contributing](CONTRIBUTING.md)?
+
+
+Alternatives
+---
+Checkout [DeltaDB](https://github.com/delta-db/deltadb) an offline-first database written in JS.
