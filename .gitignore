@@ -2,6 +2,7 @@ node_modules
 .DS_Store
 *~
 coverage
+testdb
 test/test-bundle.js
 test/.test-bundle.js
 npm-debug.log

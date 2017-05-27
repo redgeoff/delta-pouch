@@ -51,6 +51,7 @@
     "jshint": "^2.9.4",
     "mocha": "^3.4.2",
     "pouchdb": "^6.2.0",
+    "pouchdb-adapter-memory": "^6.2.0",
     "request": "^2.81.0",
     "sauce-connect-launcher": "^1.2.2",
     "uglify-js": "^3.0.11",

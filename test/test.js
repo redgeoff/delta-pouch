@@ -3,18 +3,16 @@
 
 var Pouch = require('pouchdb');
 
-//
-// your plugin goes here
-//
+// Use mem adapter as level down adapter has problems running on virtualbox:
+// https://github.com/Level/levelup/issues/222
+Pouch.plugin(require('pouchdb-adapter-memory'));
+
 var deltaPlugin = require('../');
 Pouch.plugin(deltaPlugin);
 
 var chai = require('chai');
 chai.use(require("chai-as-promised"));
 
-//
-// more variables you might want
-//
 chai.should(); // var should = chai.should();
 var Promise = require('bluebird');
 
@@ -61,14 +59,15 @@ function tests(dbName, dbType) {
   }
 
   beforeEach(function () {
-    db = new Pouch(dbName);
+    db = new Pouch(dbName, {adapter: 'memory'});
     return db;
   });
+
   afterEach(function () {
-    return Pouch.destroy(dbName);
+    return db.destroy();
   });
 
-  describe(dbType + ': delta test suite', function () {
+  describe(dbType, function () {
 
     this.timeout(5000); // increase timeout for TravisCI
 
