@@ -26,6 +26,7 @@ function notDefined(obj) {
 
 exports.delta = new events.EventEmitter();
 
+// TODO: is this even needed anymore? Does PouchDB even emit these events anymore?
 exports.deltaInit = function () {
   this.on('create', function (object) {
     onCreate(this, object);
@@ -56,9 +57,10 @@ function save(db, doc) {
   if (doc.$id) { // update?
     // this format guarantees the docs will be retrieved in order they were created
     doc._id = doc.$id + '_' + doc.$createdAt;
-    onCreate(db, { id: doc._id });
+
     return db.put(doc).then(function (response) {
       response.$id = doc.$id;
+      onCreate(db, response);
       return response;
     }).catch(/* istanbul ignore next */ function (err) {
       // It appears there is a bug in pouch that causes a doc conflict even though we are creating a
