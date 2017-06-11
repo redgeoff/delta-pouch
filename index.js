@@ -1,6 +1,6 @@
 'use strict';
 
-var utils = require('./pouch-utils'); // TODO: is it ok that this causes warnings with uglifyjs??
+var utils = require('./pouch-utils');
 var Promise = utils.Promise;
 
 var events = require('events');
@@ -56,6 +56,7 @@ function save(db, doc) {
   if (doc.$id) { // update?
     // this format guarantees the docs will be retrieved in order they were created
     doc._id = doc.$id + '_' + doc.$createdAt;
+    onCreate(db, { id: doc._id });
     return db.put(doc).then(function (response) {
       response.$id = doc.$id;
       return response;
@@ -69,6 +70,7 @@ function save(db, doc) {
   } else { // new
     return db.post(doc).then(function (response) {
       response.$id = response.id;
+      onCreate(db, { id: response.id });
       return response;
     });
   }

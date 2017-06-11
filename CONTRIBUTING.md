@@ -11,23 +11,18 @@ Testing
 
 ### In Node
 
-This will run the tests in Node using LevelDB:
+This will run the tests in Node:
 
     npm test
-    
+
 You can also check for 100% code coverage using:
 
     npm run coverage
 
-If you don't like the coverage results, change the values from 100 to something else in `package.json`, or add `/*istanbul ignore */` comments.
+Run single test
 
+    ./node_modules/mocha/bin/mocha -g '<regex>' test/index.js
 
-If you have mocha installed globally you can run single test with:
-```
-TEST_DB=local mocha --reporter spec --grep search_phrase
-```
-
-The `TEST_DB` environment variable specifies the database that PouchDB should use (see `package.json`).
 
 ### In the browser
 

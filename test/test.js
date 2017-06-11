@@ -21,7 +21,7 @@ if (process.browser) {
   dbs = 'testdb' + Math.random() +
     ',http://localhost:5984/testdb' + Math.round(Math.random() * 100000);
 } else {
-  dbs = process.env.TEST_DB;
+  dbs = process.env.TEST_DB ? process.env.TEST_DB : 'testdb';
 }
 
 dbs.split(',').forEach(function (db) {
@@ -289,13 +289,12 @@ function tests(dbName, dbType) {
     it('should emit create', function () {
       var item = { title: 'take out trash' };
       db.deltaInit();
-      var promise = new Promise(function (resolve, reject) {
+      return new Promise(function (resolve, reject) {
         db.delta.on('create', new AssertFunctionFactory(function (doc) {
           assertContains(doc, { $id: doc.$id });
         }, resolve, reject));
+        save(item);
       });
-      save(item);
-      return promise;
     });
 
     it('should not emit create when already deleted', function () {
