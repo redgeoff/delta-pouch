@@ -26,7 +26,6 @@ function notDefined(obj) {
 
 exports.delta = new events.EventEmitter();
 
-// TODO: is this even needed anymore? Does PouchDB even emit these events anymore?
 exports.deltaInit = function () {
   this.on('create', function (object) {
     onCreate(this, object);
