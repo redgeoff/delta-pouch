@@ -52,7 +52,7 @@ function indexOf(id) {
       return i;
     }
   }
-  return null;    
+  return null;
 }
 
 function getSite(id) {
@@ -70,7 +70,7 @@ function deleteSite(id) {
 function updateSite(site) {
   var i = indexOf(site.$id);
   if (i !== null) {
-    sites[i] = site; 
+    sites[i] = site;
   }
 }
 
@@ -115,8 +115,6 @@ function saveSite() {
   }
   setFormVisible(false);
 }
-
-db.deltaInit();
 
 db.delta
   .on('create', addSiteAndItem)

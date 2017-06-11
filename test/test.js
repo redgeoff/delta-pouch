@@ -288,7 +288,6 @@ function tests(dbName, dbType) {
 
     it('should emit create', function () {
       var item = { title: 'take out trash' };
-      db.deltaInit();
       return new Promise(function (resolve, reject) {
         db.delta.on('create', new AssertFunctionFactory(function (doc) {
           assertContains(doc, { $id: doc.$id });
@@ -301,7 +300,6 @@ function tests(dbName, dbType) {
       return saveTrash().then(function (trashId) {
         return db.delete(trashId).then(function () {
           var item = { $id: trashId, title: 'put out trash cans' };
-          db.deltaInit();
           var promise = new Promise(function (resolve, reject) {
             db.delta.on('create', new AssertNeverFactory(resolve, reject));
           });
@@ -315,7 +313,6 @@ function tests(dbName, dbType) {
       var item1 = { title: 'take out trash' };
       return save(item1).then(function (object1) {
         var item2 = { $id: object1.id, title: 'take out recycling' };
-        db.deltaInit();
         var promise = new Promise(function (resolve, reject) {
           db.delta.on('update', new AssertFunctionFactory(function (doc) {
             assertContains(doc, item2);
@@ -328,7 +325,6 @@ function tests(dbName, dbType) {
 
     it('should not emit update when already deleted', function () {
       return saveTrash().then(function (trashId) {
-        db.deltaInit();
         return db.delete(trashId).then(function () {
           return new Promise(function (resolve, reject) {
             // wait for the deletion to be marked before performing the update
@@ -344,7 +340,6 @@ function tests(dbName, dbType) {
 
     it('should emit delete', function () {
       return saveTrash().then(function (trashId) {
-        db.deltaInit();
         var promise = new Promise(function (resolve, reject) {
           db.delta.on('delete', new AssertFunctionFactory(function (id) {
             id.should.equal(trashId);

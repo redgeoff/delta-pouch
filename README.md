@@ -97,7 +97,6 @@ Delta pouch stores every change as a doc. The cleanup() function removes any cha
 
 **Listen for events**
 ```js
-db.deltaInit();
 db.delta
   .on('create', function (doc) {
     // e.g. doc = { $id: 123, url: 'google.com', views: 0  }
