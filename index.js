@@ -26,16 +26,14 @@ function notDefined(obj) {
 
 exports.delta = new events.EventEmitter();
 
+// TODO: is this even needed anymore? Does PouchDB even emit these events anymore?
 exports.deltaInit = function () {
-  // TODO: remove in a future version as it is no longer needed and PouchDB doesn't even emit these
-  // events anymore
-  //
-  // this.on('create', function (object) {
-  //   onCreate(this, object);
-  // });
-  // this.on('destroyed', function () {
-  //   onDestroyed(this);
-  // });
+  this.on('create', function (object) {
+    onCreate(this, object);
+  });
+  this.on('destroyed', function () {
+    onDestroyed(this);
+  });
 };
 
 exports.clone = function (obj) {

@@ -40,6 +40,8 @@
     document.getElementById('value').value = '';
   }
 
+  db.deltaInit();
+
   db.delta
     .on('create', onChange)
     .on('update', onChange);
@@ -67,7 +69,7 @@
     // For the sake of keeping our iris example clean we will call cleanup here, but normally we
     // would call it from a cron job
     if (location.search) { // using iris?
-      db.cleanup();
+      db.cleanup();   
     }
   });
 
