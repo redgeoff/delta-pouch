@@ -27,9 +27,12 @@ function notDefined(obj) {
 exports.delta = new events.EventEmitter();
 
 exports.deltaInit = function () {
-  this.on('create', function (object) {
-    onCreate(this, object);
-  });
+
+  // TODO: remove as not needed anymore, right?
+  // this.on('created', function (object) {
+  //   onCreate(this, object);
+  // });
+
   this.on('destroyed', function () {
     onDestroyed(this);
   });
