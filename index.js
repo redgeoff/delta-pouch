@@ -1,6 +1,6 @@
 'use strict';
 
-var utils = require('./pouch-utils'); // TODO: is it ok that this causes warnings with uglifyjs??
+var utils = require('./pouch-utils');
 var Promise = utils.Promise;
 
 var events = require('events');
@@ -27,9 +27,12 @@ function notDefined(obj) {
 exports.delta = new events.EventEmitter();
 
 exports.deltaInit = function () {
-  this.on('create', function (object) {
-    onCreate(this, object);
-  });
+
+  // TODO: remove as not needed anymore, right?
+  // this.on('created', function (object) {
+  //   onCreate(this, object);
+  // });
+
   this.on('destroyed', function () {
     onDestroyed(this);
   });
@@ -56,8 +59,10 @@ function save(db, doc) {
   if (doc.$id) { // update?
     // this format guarantees the docs will be retrieved in order they were created
     doc._id = doc.$id + '_' + doc.$createdAt;
+
     return db.put(doc).then(function (response) {
       response.$id = doc.$id;
+      onCreate(db, response);
       return response;
     }).catch(/* istanbul ignore next */ function (err) {
       // It appears there is a bug in pouch that causes a doc conflict even though we are creating a
@@ -69,6 +74,7 @@ function save(db, doc) {
   } else { // new
     return db.post(doc).then(function (response) {
       response.$id = response.id;
+      onCreate(db, { id: response.id });
       return response;
     });
   }

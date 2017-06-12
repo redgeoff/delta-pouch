@@ -1,12 +1,14 @@
 'use strict';
 
 var Promise;
+
 /* istanbul ignore next */
 if (typeof window !== 'undefined' && window.PouchDB) {
   Promise = window.PouchDB.utils.Promise;
 } else {
   Promise = typeof global.Promise === 'function' ? global.Promise : require('lie');
 }
+
 /* istanbul ignore next */
 exports.once = function (fun) {
   var called = false;
@@ -20,6 +22,7 @@ exports.once = function (fun) {
     }
   });
 };
+
 /* istanbul ignore next */
 exports.getArguments = function (fun) {
   return function () {

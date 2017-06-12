@@ -1,11 +1,16 @@
 language: node_js
 
+node_js:
+  - "6"
+
 services:
   - couchdb
 
 node_js:
-  - "0.10"
+  - "node"
+
 script: npm run $COMMAND
+
 before_script:
   - "export DISPLAY=:99.0"
   - "sh -e /etc/init.d/xvfb start"
@@ -28,3 +33,4 @@ env:
   - CLIENT=selenium:firefox COMMAND=test
   - CLIENT=selenium:phantomjs COMMAND=test
   - COMMAND=coverage
+  - echo "working?"
