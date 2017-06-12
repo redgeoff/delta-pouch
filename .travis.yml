@@ -9,9 +9,6 @@ node_js:
 services:
   - couchdb
 
-node_js:
-  - "node"
-
 script: npm run $COMMAND
 
 before_script:
