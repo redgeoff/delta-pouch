@@ -1,6 +1,5 @@
 language: node_js
 
-# Is this needed for leveldown?
 node_js:
   - "6"
 
