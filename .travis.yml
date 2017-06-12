@@ -1,5 +1,9 @@
 language: node_js
 
+# Need to use node v6 or else we'll have problems with leveldown as required by pouchdb
+node_js:
+  - "6"
+
 services:
   - couchdb
 
