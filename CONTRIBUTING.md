@@ -39,19 +39,19 @@ phantomjs:
 
 You can also filter the tests, e.g.
 
-    $ node_modules/gofur/scripts/browser/test.js -c cache -t test/index.js -g reg-ex
+    $ npm run browser-test-phantomjs -- -g reg-ex
 
 Chrome:
 
 Note: you must have Chrome installed
 
-    $ node_modules/gofur/scripts/browser/test.js -c cache -t test/index.js -b selenium:chrome
+    $ npm run browser-test-phantomjs -- -b selenium:chrome
 
 Firefox:
 
 Note: you must have Firefox installed
 
-    $ node_modules/gofur/scripts/browser/test.js -c cache -t test/index.js -b selenium:firefox
+    $ npm run browser-test-phantomjs -- -b selenium:firefox
 
 Firefox and Chrome use IndexedDB and PhantomJS uses WebSQL.
 
