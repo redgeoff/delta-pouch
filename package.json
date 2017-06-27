@@ -44,7 +44,7 @@
     "bluebird": "^3.5.0",
     "browserify": "^14.3.0",
     "chai": "^4.0.0",
-    "chai-as-promised": "^6.0.0",
+    "chai-as-promised": "^7.0.0",
     "events": "^1.1.1",
     "http-server": "^0.10.0",
     "istanbul": "^0.4.5",
