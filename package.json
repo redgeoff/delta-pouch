@@ -23,15 +23,17 @@
     "url": "https://github.com/redgeoff/delta-pouch/issues"
   },
   "scripts": {
-    "test-node": "TEST_DB=testdb,http://localhost:5984/testdb istanbul test ./node_modules/mocha/bin/_mocha test/test.js",
-    "test-browser": "./bin/test-browser.js",
     "jshint": "jshint -c .jshintrc *.js test/test.js examples/websites/*.js",
-    "test": "npm run jshint && ./bin/run-test.sh",
+    "node-test": "TEST_DB=testdb,http://localhost:5984/testdb istanbul test ./node_modules/mocha/bin/_mocha test/index.js",
+    "node-full-test": "npm run node-test --coverage && istanbul check-coverage --lines 100 --function 100 --statements 100 --branches 100",
+    "browser-server": "node_modules/gofur/scripts/browser/serve.js -c cache -t test/index.js",
+    "browser-test": "node_modules/gofur/scripts/browser/test.js -c cache -t test/index.js",
+    "browser-test-firefox": "node_modules/gofur/scripts/browser/test.js -c cache -t test/index.js -b selenium:firefox",
+    "browser-test-chrome": "node_modules/gofur/scripts/browser/test.js -c cache -t test/index.js -b selenium:chrome",
+    "browser-test-phantomjs": "node_modules/gofur/scripts/browser/test.js -c cache -t test/index.js -b selenium:phantomjs",
+    "test": "npm run jshint && npm run node-full-test && npm run browser-test",
     "build": "mkdir -p dist && browserify index.js -o dist/pouchdb.delta-pouch.js && npm run min",
-    "min": "uglifyjs dist/pouchdb.delta-pouch.js -mc > dist/pouchdb.delta-pouch.min.js",
-    "dev": "browserify test/test.js > test/test-bundle.js && npm run dev-server",
-    "dev-server": "./bin/dev-server.js",
-    "coverage": "npm test --coverage && istanbul check-coverage --lines 100 --function 100 --statements 100 --branches 100"
+    "min": "uglifyjs dist/pouchdb.delta-pouch.js -mc > dist/pouchdb.delta-pouch.min.js"
   },
   "dependencies": {
     "argsarray": "0.0.1",
@@ -42,28 +44,17 @@
   },
   "devDependencies": {
     "bluebird": "^3.5.0",
-    "browserify": "^14.3.0",
+    "browserify": "^14.4.0",
     "chai": "^4.0.0",
     "chai-as-promised": "^6.0.0",
     "events": "^1.1.1",
-    "http-server": "^0.10.0",
+    "gofur": "0.0.6",
     "istanbul": "^0.4.5",
     "jshint": "^2.9.4",
     "mocha": "^3.4.2",
     "pouchdb": "^6.2.0",
     "pouchdb-adapter-memory": "^6.2.0",
     "request": "^2.81.0",
-    "sauce-connect-launcher": "^1.2.2",
-    "uglify-js": "^3.0.11",
-    "watchify": "^3.9.0",
-    "wd": "^1.2.0"
-  },
-  "browser": {
-    "crypto": false
-  },
-  "browserify": {
-    "transform": [
-      "es3ify"
-    ]
+    "uglify-js": "^3.0.11"
   }
 }
