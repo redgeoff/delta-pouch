@@ -329,15 +329,18 @@ function tests(dbName, dbType) {
     it('should not emit update when already deleted', function () {
       return saveTrash().then(function (trashId) {
         db.deltaInit();
-        return db.delete(trashId).then(function () {
-          return new Promise(function (resolve, reject) {
-            // wait for the deletion to be marked before performing the update
-            db.delta.on('delete', function () {
-              var item = { $id: trashId, title: 'put out trash cans' };
-              db.delta.on('update', new AssertNeverFactory(resolve, reject, 'update'));
-              save(item);
-            });
+
+        var promise = new Promise(function (resolve, reject) {
+          // wait for the deletion to be marked before performing the update
+          db.delta.on('delete', function () {
+            var item = { $id: trashId, title: 'put out trash cans' };
+            db.delta.on('update', new AssertNeverFactory(resolve, reject, 'update'));
+            save(item);
           });
+        });
+
+        return db.delete(trashId).then(function () {
+          return promise;
         });
       });
     });
