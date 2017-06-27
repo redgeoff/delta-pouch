@@ -227,9 +227,9 @@ function tests(dbName, dbType) {
       return saveTrash().then(function (dishesId) {
         return cleanup().then(function (doc) {
           assertContains(doc.rows[0].doc,
-            { $id: dishesId, title: 'take out trash and recycling' });
+            { _id: dishesId, title: 'take out trash' });
           assertContains(doc.rows[1].doc,
-            { $id: dishesId, priority: 'high' });
+            { $id: dishesId, priority: 'medium' });
         });
       });
     });
@@ -261,9 +261,9 @@ function tests(dbName, dbType) {
       return deleteTrash().then(function (dishesId) {
         return cleanup().then(function (doc) {
           assertContains(doc.rows[0].doc,
-            { $id: dishesId, title: 'clean & dry dishes' });
+            { _id: dishesId, priority: 'low' });
           assertContains(doc.rows[1].doc,
-            { $id: dishesId, priority: 'medium' });
+            { $id: dishesId, title: 'clean dishes' });
         });
       });
     });

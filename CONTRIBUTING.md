@@ -13,11 +13,11 @@ Testing
 
 This will run the tests in Node:
 
-    npm test
+    npm run node-test
 
 You can also check for 100% code coverage using:
 
-    npm run coverage
+    npm run node-full-test
 
 Run single test
 
@@ -35,7 +35,7 @@ Run single test
 
 phantomjs:
 
-    $ node_modules/gofur/scripts/browser/test.js -c cache -t test/index.js
+    $ npm run browser-test-phantomjs
 
 You can also filter the tests, e.g.
 
