@@ -1,7 +1,6 @@
 'use strict';
 
-var utils = require('./pouch-utils');
-var Promise = utils.Promise;
+var Promise = require('bluebird');
 
 var events = require('events');
 
