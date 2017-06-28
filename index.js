@@ -1,7 +1,6 @@
 'use strict';
 
-var utils = require('./pouch-utils');
-var Promise = utils.Promise;
+var Promise = require('bluebird');
 
 var events = require('events');
 
@@ -202,6 +201,7 @@ function removeDeletions(db, doc, deletions) {
 }
 
 function cleanupDoc(db, el, docs, deletions) {
+
   return db.get(el.doc._id).then(function (object) {
 
     if (!el.doc.$id) { // first delta for doc?
@@ -230,6 +230,12 @@ function cleanupDoc(db, el, docs, deletions) {
   });
 }
 
+var cleanupFactory = function (db, el, docs, deletions) {
+  return function () {
+    return cleanupDoc(db, el, docs, deletions);
+  };
+};
+
 // TODO: also create fn like noBufferCleanup that uses REST to cleanup??
 //       This way can use timestamp so not cleaning same range each time
 exports.cleanup = function () {
@@ -238,14 +244,9 @@ exports.cleanup = function () {
 
     var docs = {}, deletions = {}, chain = Promise.resolve();
 
-    // reverse sort by createdAt
-    doc.rows.sort(function (a, b) {
-      return a.doc.$createdAt < b.doc.$createdAt;
-    });
-
     // The cleanupDoc() calls must execute in sequential order
     doc.rows.forEach(function (el) {
-      chain = chain.then(function () { return cleanupDoc(db, el, docs, deletions); });
+      chain = chain.then(cleanupFactory(db, el, docs, deletions));
     });
 
     return chain.then(function () {
