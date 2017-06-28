@@ -1,9 +1,9 @@
 Delta Pouch
 =====
 
-[![Build Status](https://travis-ci.org/redgeoff/delta-pouch.svg)](https://travis-ci.org/redgeoff/delta-pouch)
+[![Circle CI](https://circleci.com/gh/redgeoff/delta-pouch.svg?style=svg&circle-token=f8057092b90605617a02cee115ceeb9cb9884c03)](https://circleci.com/gh/redgeoff/delta-pouch)
 
-A PouchDB plugin for partial updates that uses the every-doc-is-a-delta storage pattern. You can use delta pouch to enable collaborative editing of the same docs.
+A PouchDB plugin for partial updates that uses the every-doc-is-a-delta storage pattern. You can use delta pouch to enable conflict-free collaborative editing of the same docs.
 
 Example
 ----
@@ -67,7 +67,7 @@ db.save({ url: 'google.com', views: 0 }).then(function (doc) {
 ```js
 db.save({
     $id: doc.$id, // id from creation
-    views: 1 });
+    views: 1
 }).then(function (item) {
   // item.$id is the id of the updated doc, i.e. item.$id = doc.$id
 });
@@ -135,3 +135,8 @@ Check out [factoryng](https://github.com/redgeoff/factoryng), an all-in-one angu
 Contributing
 ----
 Interested in [contributing](CONTRIBUTING.md)?
+
+
+Alternatives
+---
+Checkout [DeltaDB](https://github.com/delta-db/deltadb) an offline-first database written in JS.

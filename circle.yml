@@ -1,0 +1,18 @@
+# Doesn't actually work!
+# node:
+#  version: 6.9.2
+
+dependencies:
+  pre:
+    - nvm install 6.9.2
+
+  override:
+    - nvm use 6.9.2 && npm install
+
+test:
+  pre:
+    - nvm use 6.9.2 && npm run jshint
+
+  override:
+    - nvm use 6.9.2 && npm run node-full-test
+    - nvm use 6.9.2 && npm run browser-test-phantomjs
