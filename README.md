@@ -1,6 +1,7 @@
 Delta Pouch
 =====
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/redgeoff/delta-pouch.svg)](https://greenkeeper.io/)
 [![Circle CI](https://circleci.com/gh/redgeoff/delta-pouch.svg?style=svg&circle-token=f8057092b90605617a02cee115ceeb9cb9884c03)](https://circleci.com/gh/redgeoff/delta-pouch)
 
 A PouchDB plugin for partial updates that uses the every-doc-is-a-delta storage pattern. You can use delta pouch to enable conflict-free collaborative editing of the same docs.
