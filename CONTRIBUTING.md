@@ -13,11 +13,11 @@ Testing
 
 This will run the tests in Node:
 
-    npm test
+    npm run node-test
 
 You can also check for 100% code coverage using:
 
-    npm run coverage
+    npm run node-full-test
 
 Run single test
 
@@ -26,18 +26,35 @@ Run single test
 
 ### In the browser
 
-Run `npm run dev` and then point your favorite browser to [http://127.0.0.1:8001/test/index.html](http://127.0.0.1:8001/test/index.html).
+    $ npm run browser-server
+    Use any browser to visit http://127.0.0.1:8001/index.html
+    And you can filter the tests, e.g. http://127.0.0.1:8001/index.html?grep=reg-ex
 
-The query param `?grep=mysearch` will search for tests matching `mysearch`.
 
 ### Automated browser tests
 
-You can run e.g.
+phantomjs:
 
-    CLIENT=selenium:firefox npm test
-    CLIENT=selenium:phantomjs npm test
+    $ npm run browser-test-phantomjs
 
-This will run the tests automatically and the process will exit with a 0 or a 1 when it's done. Firefox uses IndexedDB, and PhantomJS uses WebSQL.
+You can also filter the tests, e.g.
+
+    $ npm run browser-test-phantomjs -- -g reg-ex
+
+Chrome:
+
+Note: you must have Chrome installed
+
+    $ npm run browser-test-phantomjs -- -b selenium:chrome
+
+Firefox:
+
+Note: you must have Firefox installed
+
+    $ npm run browser-test-phantomjs -- -b selenium:firefox
+
+Firefox and Chrome use IndexedDB and PhantomJS uses WebSQL.
+
 
 Build & Publish
 ----
