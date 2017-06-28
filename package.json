@@ -37,13 +37,13 @@
   },
   "dependencies": {
     "argsarray": "0.0.1",
+    "bluebird": "^3.5.0",
     "es3ify": "^0.2.2",
     "inherits": "^2.0.3",
     "lie": "^3.1.1",
     "phantomjs-prebuilt": "^2.1.14"
   },
   "devDependencies": {
-    "bluebird": "^3.5.0",
     "browserify": "^14.4.0",
     "chai": "^4.0.0",
     "chai-as-promised": "^6.0.0",
