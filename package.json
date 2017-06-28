@@ -23,7 +23,7 @@
     "url": "https://github.com/redgeoff/delta-pouch/issues"
   },
   "scripts": {
-    "jshint": "jshint -c .jshintrc *.js test/test.js examples/websites/*.js",
+    "jshint": "jshint -c .jshintrc *.js test/index.js examples/websites/*.js",
     "node-test": "TEST_DB=testdb,http://localhost:5984/testdb istanbul test ./node_modules/mocha/bin/_mocha test/index.js",
     "node-full-test": "npm run node-test --coverage && istanbul check-coverage --lines 100 --function 100 --statements 100 --branches 100",
     "browser-server": "node_modules/gofur/scripts/browser/serve.js -c cache -t test/index.js",
