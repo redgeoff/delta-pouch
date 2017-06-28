@@ -16,19 +16,6 @@ chai.use(require("chai-as-promised"));
 chai.should(); // var should = chai.should();
 var Promise = require('bluebird');
 
-var dbs;
-if (process.browser) {
-  dbs = 'testdb' + Math.random() +
-    ',http://localhost:5984/testdb' + Math.round(Math.random() * 100000);
-} else {
-  dbs = process.env.TEST_DB ? process.env.TEST_DB : 'testdb';
-}
-
-dbs.split(',').forEach(function (db) {
-  var dbType = /^http/.test(db) ? 'http' : 'local';
-  tests(db, dbType);
-});
-
 function length(obj) {
   var n = 0;
   for (var i in obj) { // jshint unused:false
@@ -43,9 +30,10 @@ function setTimeoutPromise(ms) {
   });
 }
 
-function tests(dbName, dbType) {
+describe('delta-pouch', function () {
 
-  var db;
+  var db,
+    dbName = 'testdb';
 
   // Wait a millsecond after saving before resolving to prevent two saves on the same millisecond.
   // It is "fine" if two saves occur on the same millisecond, but it is impossible to guarantee test
@@ -67,7 +55,6 @@ function tests(dbName, dbType) {
     return db.destroy();
   });
 
-  describe(dbType, function () {
 
     this.timeout(5000); // increase timeout for TravisCI
 
@@ -363,6 +350,5 @@ function tests(dbName, dbType) {
       return db.getAndRemove('123');
     });
 
-    // TODO: test simulatenous client updates/deletes
-  });
-}
+  // TODO: test simulatenous client updates/deletes
+});
