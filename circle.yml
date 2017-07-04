@@ -2,6 +2,10 @@
 # node:
 #  version: 6.9.2
 
+machine:
+  services:
+    - docker
+
 dependencies:
   pre:
     - nvm install 6.9.2
