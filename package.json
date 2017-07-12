@@ -23,6 +23,8 @@
     "url": "https://github.com/redgeoff/delta-pouch/issues"
   },
   "scripts": {
+    "assert-beautified": "beautify-proj -i test -c beautify.json && beautify-proj -i scripts -c beautify.json",
+    "beautify": "beautify-proj -i test -o . -c beautify.json && beautify-proj -i scripts -o . -c beautify.json",
     "jshint": "jshint -c .jshintrc *.js test/index.js examples/websites/*.js",
     "node-test": "istanbul test ./node_modules/mocha/bin/_mocha test/index.js",
     "node-full-test": "npm run node-test --coverage && istanbul check-coverage --lines 100 --function 100 --statements 100 --branches 100",
@@ -41,18 +43,14 @@
     "min": "uglifyjs dist/pouchdb.delta-pouch.js -mc > dist/pouchdb.delta-pouch.min.js"
   },
   "dependencies": {
-    "argsarray": "0.0.1",
     "bluebird": "^3.5.0",
-    "es3ify": "^0.2.2",
-    "inherits": "^2.0.3",
-    "lie": "^3.1.1",
-    "phantomjs-prebuilt": "^2.1.14"
+    "events": "^1.1.1"
   },
   "devDependencies": {
+    "beautify-proj": "^1.0.0",
     "browserify": "^14.4.0",
     "chai": "^4.1.0",
     "chai-as-promised": "6.0.0",
-    "events": "^1.1.1",
     "gofur": "^0.0.7",
     "istanbul": "^0.4.5",
     "jshint": "^2.9.4",
