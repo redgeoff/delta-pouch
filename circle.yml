@@ -1,6 +1,6 @@
 # Doesn't actually work!
 # node:
-#  version: 6.9.2
+#  version: 7.10.0
 
 # # Uncomment to test with CouchDB 2
 # machine:
@@ -9,19 +9,26 @@
 
 dependencies:
   pre:
-    - nvm install 6.9.2
+    - nvm install 7.10.0
+    - nvm use 7.10.0 && npm install -g npm
 
     # # Uncomment to test with CouchDB 2
-    # CouchDB 2
-    # - docker run -d --name couchdb -p 5984:5984 -e COUCHDB_USER='admin' -e COUCHDB_PASSWORD='admin' redgeoff/couchdb
+    # - docker run -d --name couchdb --restart always -p 5984:5984 -e COUCHDB_USER='admin' -e COUCHDB_PASSWORD='admin' redgeoff/couchdb
+    # # For for DB to be ready
+    # - sleep 15
+    # - curl -X PUT http://admin:admin@db.quizster.dev:5984/_users
+    # - curl -X PUT http://admin:admin@db.quizster.dev:5984/_replicator
+    # - curl -X PUT http://admin:admin@db.quizster.dev:5984/_global_changes
 
   override:
-    - nvm use 6.9.2 && npm install
+    - nvm use 7.10.0 && npm install
 
 test:
   pre:
-    - nvm use 6.9.2 && npm run jshint
+    - nvm use 7.10.0 && npm run assert-beautified
+    - nvm use 7.10.0 && npm run jshint
 
   override:
-    - nvm use 6.9.2 && npm run node-full-test
-    - nvm use 6.9.2 && npm run browser-test-phantomjs
+    - nvm use 7.10.0 && npm run node-full-test
+    - nvm use 7.10.0 && npm run browser-test-phantomjs
+    - nvm use 7.10.0 && npm run browser-coverage-full-test
