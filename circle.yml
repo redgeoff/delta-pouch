@@ -25,7 +25,6 @@ dependencies:
 
 test:
   pre:
-    - nvm use 7.10.0 && npm run assert-beautified
     - nvm use 7.10.0 && npm run jshint
 
   override:
