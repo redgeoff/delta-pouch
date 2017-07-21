@@ -56,7 +56,7 @@
     "jshint": "^2.9.4",
     "mocha": "^3.4.2",
     "pouchdb": "^6.3.4",
-    "pouchdb-adapter-memory": "^6.3.2",
+    "pouchdb-adapter-memory": "^6.3.4",
     "request": "^2.81.0",
     "uglify-js": "^3.0.11"
   },
