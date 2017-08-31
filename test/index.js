@@ -463,7 +463,7 @@ describe('delta-pouch', function () {
         return save({
           $id: doc.id,
           priority: 'high'
-        })
+        });
       });
     }).then(function () {
       return db.all();
