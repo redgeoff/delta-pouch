@@ -454,5 +454,23 @@ describe('delta-pouch', function () {
     return db.getAndRemove('123');
   });
 
+  // This is needed as the tests above may or may not test this code path
+  it('should ignore update after deletion', function () {
+    return save({
+      priority: 'low'
+    }).then(function (doc) {
+      return db.delete(doc.id).then(function () {
+        return save({
+          $id: doc.id,
+          priority: 'high'
+        })
+      });
+    }).then(function () {
+      return db.all();
+    }).then(function (docs) {
+      docs.should.eql({});
+    });
+  });
+
   // TODO: test simulatenous client updates/deletes
 });
