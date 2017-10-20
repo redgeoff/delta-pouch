@@ -58,7 +58,7 @@
     "pouchdb": "^6.3.4",
     "pouchdb-adapter-memory": "^6.3.4",
     "request": "^2.81.0",
-    "uglify-js": "^3.1.0"
+    "uglify-js": "^3.1.1"
   },
   "greenkeeper": {
     "ignore": [
