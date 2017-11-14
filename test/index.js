@@ -40,7 +40,9 @@ describe('delta-pouch', function () {
   // results when this happens.
   function save(doc) {
     return db.save(doc).then(function (response) {
-      return setTimeoutPromise(1).then(function () {
+      // We need to wait 2 milliseconds as in some cases, waiting just a single millisecond doesn't
+      // guarantee ordering
+      return setTimeoutPromise(2).then(function () {
         return response;
       });
     });
