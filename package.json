@@ -48,17 +48,17 @@
   },
   "devDependencies": {
     "beautify-proj": "^1.0.0",
-    "browserify": "^14.4.0",
+    "browserify": "^14.5.0",
     "chai": "^4.1.0",
     "chai-as-promised": "6.0.0",
-    "gofur": "^0.0.8",
+    "gofur": "0.0.8",
     "istanbul": "^0.4.5",
     "jshint": "^2.9.4",
     "mocha": "^4.0.0",
     "pouchdb": "^6.3.4",
     "pouchdb-adapter-memory": "^6.3.4",
     "request": "^2.81.0",
-    "uglify-js": "^3.1.1"
+    "uglify-js": "^3.1.9"
   },
   "greenkeeper": {
     "ignore": [
