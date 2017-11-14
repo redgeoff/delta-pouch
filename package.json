@@ -51,7 +51,7 @@
     "browserify": "^14.4.0",
     "chai": "^4.1.0",
     "chai-as-promised": "6.0.0",
-    "gofur": "^0.0.8",
+    "gofur": "^0.0.9",
     "istanbul": "^0.4.5",
     "jshint": "^2.9.4",
     "mocha": "^4.0.0",
