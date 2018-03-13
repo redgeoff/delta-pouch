@@ -32,7 +32,6 @@
     "browser-test": "node_modules/gofur/scripts/browser/test.js -c cache -t test/index.js",
     "browser-test-firefox": "node_modules/gofur/scripts/browser/test.js -c cache -t test/index.js -b selenium:firefox",
     "browser-test-chrome": "node_modules/gofur/scripts/browser/test.js -c cache -t test/index.js -b selenium:chrome",
-    "browser-test-phantomjs": "node_modules/gofur/scripts/browser/test.js -c cache -t test/index.js -b selenium:phantomjs",
     "browser-coverage-server": "node_modules/gofur/scripts/browser-coverage/serve.js -c cache -t test/index.js",
     "browser-coverage-test": "node_modules/gofur/scripts/browser-coverage/test.js -c cache -t test/index.js",
     "browser-coverage-report": "istanbul report --dir cache/coverage/browser --root cache/coverage/browser lcov",
@@ -48,17 +47,16 @@
   },
   "devDependencies": {
     "beautify-proj": "^1.0.0",
-    "browserify": "^16.0.0",
+    "browserify": "^16.1.1",
     "chai": "^4.1.2",
     "chai-as-promised": "6.0.0",
-    "gofur": "1.0.1",
+    "gofur": "1.1.0",
     "istanbul": "^0.4.5",
     "jshint": "^2.9.4",
-    "mocha": "^5.0.1",
+    "mocha": "^5.0.4",
     "pouchdb": "^6.3.4",
     "pouchdb-adapter-memory": "^6.3.4",
-    "request": "^2.81.0",
-    "uglify-js": "^3.3.9"
+    "uglify-js": "^3.3.14"
   },
   "greenkeeper": {
     "ignore": [

@@ -31,29 +31,29 @@ Run single test
     And you can filter the tests, e.g. http://127.0.0.1:8001/index.html?grep=reg-ex
 
 
-### Automated browser tests
+## Automated browser tests
 
-phantomjs:
-
-    $ npm run browser-test-phantomjs
-
-You can also filter the tests, e.g.
-
-    $ npm run browser-test-phantomjs -- -g reg-ex
-
-Chrome:
+Testing in headless Chrome:
 
 Note: you must have Chrome installed
 
-    $ npm run browser-test-phantomjs -- -b selenium:chrome
+    $ npm run browser-test
+
+You can also filter the tests, e.g.
+
+    $ npm run browser-test -- -g 'some reg-ex'
 
 Firefox:
 
 Note: you must have Firefox installed
 
-    $ npm run browser-test-phantomjs -- -b selenium:firefox
+    $ npm run browser-test -- -b selenium:firefox
 
-Firefox and Chrome use IndexedDB and PhantomJS uses WebSQL.
+To test in headless Chrome, generate code coverage and check for 100% coverage:
+
+    $ npm run browser-coverage-full-test
+
+You can then view the test coverage by opening cache/coverage/browser/lcov-report/index.html in any browser
 
 
 Build & Publish
