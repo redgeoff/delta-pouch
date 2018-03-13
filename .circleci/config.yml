@@ -1,0 +1,22 @@
+version: 2
+
+jobs:
+  build:
+    docker:
+      - image: circleci/node:8.9.4-stretch-browsers
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+          - v1-dependencies-{{ checksum "package.json" }}
+          - v1-dependencies-
+      - run: npm install
+      - save_cache:
+          paths:
+            - node_modules
+          key: v1-dependencies-{{ checksum "package.json" }}
+      - run: npm run assert-beautified
+      - run: npm run jshint
+      - run: npm run node-full-test
+      - run: npm run browser-test
+      - run: npm run browser-coverage-full-test
