@@ -474,5 +474,24 @@ describe('delta-pouch', function () {
     });
   });
 
+  it('should update before deletion', function () {
+    var doc = null;
+    return save({
+      priority: 'low'
+    }).then(function (_doc) {
+      doc = _doc;
+      return save({
+        $id: doc.id,
+        priority: 'high'
+      })
+    }).then(function () {
+      return db.delete(doc.id);
+    }).then(function () {
+      return db.all();
+    }).then(function (docs) {
+      docs.should.eql({});
+    });
+  });
+
   // TODO: test simulatenous client updates/deletes
 });
