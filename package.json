@@ -43,7 +43,7 @@
   },
   "dependencies": {
     "bluebird": "^3.5.0",
-    "events": "^2.0.0"
+    "events": "^3.0.0"
   },
   "devDependencies": {
     "beautify-proj": "^1.0.0",
