@@ -54,8 +54,8 @@
     "istanbul": "^0.4.5",
     "jshint": "^2.9.4",
     "mocha": "^5.1.1",
-    "pouchdb": "^6.3.4",
-    "pouchdb-adapter-memory": "^6.3.4",
+    "pouchdb": "^7.0.0",
+    "pouchdb-adapter-memory": "^7.0.0",
     "uglify-js": "^3.4.4"
   },
   "greenkeeper": {
