@@ -3,7 +3,8 @@ version: 2
 jobs:
   build:
     docker:
-      - image: circleci/node:8.9.4-stretch-browsers
+      # Leveldown currently requires node 8
+      - image: circleci/node:8-stretch-browsers
     steps:
       - checkout
       - restore_cache:
