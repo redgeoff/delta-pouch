@@ -493,5 +493,45 @@ describe('delta-pouch', function () {
     });
   });
 
+  // Note: this test is a bit rundundant, but it ensures that we have complete coverage regardless
+  // of races on the CouchDB data.
+  it('should get all', function () {
+    // Mock
+    db.allDocs = function () {
+      return Promise.resolve({
+        rows: [
+          {
+            doc: {
+              _id: 2,
+              task: 'play'
+            }
+          },
+          {
+            doc: {
+              _id: 1,
+              task: 'clean'
+            }
+          },
+          {
+            doc: {
+              _id: 2,
+              $deleted: true
+            }
+          },
+          {
+            doc: {
+              _id: 2,
+              task: 'play guitar'
+            }
+          }
+        ]
+      });
+    }
+
+    return db.all().then(function (docs) {
+      docs.should.eql({ 1: { _id: 1, task: 'clean', $id: 1 } })
+    });
+  });
+
   // TODO: test simulatenous client updates/deletes
 });
