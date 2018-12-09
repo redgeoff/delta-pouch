@@ -42,7 +42,7 @@
     "min": "uglifyjs dist/pouchdb.delta-pouch.js -mc > dist/pouchdb.delta-pouch.min.js"
   },
   "dependencies": {
-    "bluebird": "^3.5.0",
+    "bluebird": "^3.5.3",
     "events": "^3.0.0"
   },
   "devDependencies": {
@@ -50,7 +50,7 @@
     "browserify": "^16.1.1",
     "chai": "^4.1.2",
     "chai-as-promised": "6.0.0",
-    "gofur": "1.1.0",
+    "gofur": "^1.1.0",
     "istanbul": "^0.4.5",
     "jshint": "^2.9.7",
     "mocha": "^5.1.1",
