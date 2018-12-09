@@ -499,8 +499,7 @@ describe('delta-pouch', function () {
     // Mock
     db.allDocs = function () {
       return Promise.resolve({
-        rows: [
-          {
+        rows: [{
             doc: {
               _id: 2,
               task: 'play'
@@ -529,7 +528,13 @@ describe('delta-pouch', function () {
     }
 
     return db.all().then(function (docs) {
-      docs.should.eql({ 1: { _id: 1, task: 'clean', $id: 1 } })
+      docs.should.eql({
+        1: {
+          _id: 1,
+          task: 'clean',
+          $id: 1
+        }
+      })
     });
   });
 
