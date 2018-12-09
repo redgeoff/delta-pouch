@@ -6,4 +6,3 @@ testdb
 test/test-bundle.js
 test/.test-bundle.js
 npm-debug.log
-package-lock.json

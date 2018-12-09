@@ -42,21 +42,21 @@
     "min": "uglifyjs dist/pouchdb.delta-pouch.js -mc > dist/pouchdb.delta-pouch.min.js"
   },
   "dependencies": {
-    "bluebird": "^3.5.0",
+    "bluebird": "^3.5.3",
     "events": "^3.0.0"
   },
   "devDependencies": {
     "beautify-proj": "^1.0.0",
-    "browserify": "^16.1.1",
-    "chai": "^4.1.2",
-    "chai-as-promised": "6.0.0",
-    "gofur": "1.1.0",
+    "browserify": "^16.2.3",
+    "chai": "^4.2.0",
+    "chai-as-promised": "^6.0.0",
+    "gofur": "^1.1.1",
     "istanbul": "^0.4.5",
-    "jshint": "^2.9.4",
-    "mocha": "^5.1.1",
+    "jshint": "^2.9.7",
+    "mocha": "^5.2.0",
     "pouchdb": "^7.0.0",
     "pouchdb-adapter-memory": "^7.0.0",
-    "uglify-js": "^3.4.4"
+    "uglify-js": "^3.4.9"
   },
   "greenkeeper": {
     "ignore": [
