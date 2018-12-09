@@ -525,7 +525,7 @@ describe('delta-pouch', function () {
           }
         ]
       });
-    }
+    };
 
     return db.all().then(function (docs) {
       docs.should.eql({
@@ -534,7 +534,7 @@ describe('delta-pouch', function () {
           task: 'clean',
           $id: 1
         }
-      })
+      });
     });
   });
 
