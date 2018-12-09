@@ -21,7 +21,7 @@ You can also check for 100% code coverage using:
 
 Run single test
 
-    ./node_modules/mocha/bin/mocha -g '<regex>' test/index.js
+    npm run node-test test/index.js -- -- -g '<regex>'
 
 
 ### In the browser
