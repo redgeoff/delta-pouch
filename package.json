@@ -55,7 +55,7 @@
     "jshint": "^2.9.7",
     "mocha": "^6.0.0",
     "pouchdb": "^7.1.0",
-    "pouchdb-adapter-memory": "^7.0.0",
+    "pouchdb-adapter-memory": "^7.1.0",
     "uglify-js": "^3.4.9"
   },
   "greenkeeper": {
