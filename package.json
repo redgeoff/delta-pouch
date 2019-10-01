@@ -42,7 +42,7 @@
     "min": "uglifyjs dist/pouchdb.delta-pouch.js -mc > dist/pouchdb.delta-pouch.min.js"
   },
   "dependencies": {
-    "bluebird": "^3.5.3",
+    "bluebird": "3.5.5",
     "events": "^3.0.0"
   },
   "devDependencies": {
