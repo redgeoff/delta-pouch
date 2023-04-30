@@ -1,8 +1,10 @@
 'use strict';
 
-var Promise = require('bluebird');
+import Promise from 'bluebird';
 
-var events = require('events');
+import events from 'events';
+
+const exports = {};
 
 function empty(obj) {
   for (var i in obj) { // jshint unused:false
@@ -262,3 +264,5 @@ exports.cleanup = function () {
 if (typeof window !== 'undefined' && window.PouchDB) {
   window.PouchDB.plugin(exports);
 }
+
+export default exports.default;
