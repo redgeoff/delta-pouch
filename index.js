@@ -136,7 +136,9 @@ function allDocs(baseFn, options, callback) {
 
 exports.all = function () {
   var db = this;
-  return db.allDocs({include_docs: true});
+  return db.allDocs({include_docs: true}).then(function (doc) {
+    return doc.rows.map(el => el.doc);
+  });
 };
 
 var deletions = {};
