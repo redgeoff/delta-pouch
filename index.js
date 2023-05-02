@@ -70,13 +70,13 @@ exports.mergeAll = function (doc) {
       deletions[el.doc.$id] = true;
     } else if (!deletions[el.doc.$id]) { // update before any deletion?
       if (docs[el.doc.$id]) { // exists?
-        docs[el.doc.$id] = exports.merge(docs[el.doc.$id], el.doc);
+        docs[el.doc.$id].doc = exports.merge(docs[el.doc.$id].doc, el.doc);
       } else {
-        docs[el.doc.$id] = el.doc;
+        docs[el.doc.$id] = el;
       }
     }
   });
-  return doc;
+  return Object.values(docs);
 }
 
 function save(db, doc) {
