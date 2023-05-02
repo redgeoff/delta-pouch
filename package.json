@@ -1,6 +1,6 @@
 {
   "name": "delta-pouch",
-  "version": "1.0.2",
+  "version": "2.0.0",
   "description": "Conflict-free collaborative editing for PouchDB",
   "main": "index.js",
   "repository": {
