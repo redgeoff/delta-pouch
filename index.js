@@ -1,10 +1,8 @@
 'use strict';
 
-import Promise from 'bluebird';
+var Promise = require('bluebird');
 
-import events from 'events';
-
-const exports = {};
+var events = require('events');
 
 function empty(obj) {
   for (var i in obj) { // jshint unused:false
@@ -306,5 +304,3 @@ exports.default = function (PouchDB) {
     return allDocs.call(this, baseAllDocs, options, callback);
   };
 };
-
-export default exports.default;
