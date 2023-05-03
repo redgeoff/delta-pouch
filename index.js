@@ -43,6 +43,7 @@ exports.clone = function (obj) {
   return JSON.parse(JSON.stringify(obj));
 };
 
+/** Utility function. Equivalent to {...obj1, ...obj2} */
 exports.merge = function (obj1, obj2) {
   var merged = {};
   for (var i in obj1) {
@@ -77,7 +78,7 @@ exports.mergeAll = function (doc) {
     }
   });
   return Object.values(docs);
-}
+};
 
 function save(db, doc) {
   delete(doc._rev); // delete any revision numbers copied from previous docs
@@ -119,25 +120,27 @@ exports.delete = function (docOrId) {
 };
 
 function allDocs(baseFn, options, callback) {
+  // jshint validthis:true
   var db = this;
-  return new Promise((res, rej) =>
-    baseFn.call(db, {...options, include_docs: true}, (err, resp) => {
+  return new Promise(function (res, rej) {
+    baseFn.call(db, exports.merge(options, {include_docs: true}), function (err, resp) {
       if (err) {
         rej(err);
       } else {
         resp.rows = exports.mergeAll(resp.rows);
         res(resp);
       }
-      if (typeof callback === "function")
+      if (typeof callback === "function") {
         callback(err, resp);
-    })
-  );
+      }
+    });
+  });
 }
 
 exports.all = function () {
   var db = this;
   return db.allDocs({include_docs: true}).then(function (doc) {
-    return doc.rows.map(el => el.doc);
+    return doc.rows.map(function (el) { return el.doc; });
   });
 };
 
@@ -291,13 +294,15 @@ if (typeof window !== 'undefined' && window.PouchDB) {
 
 // This needs to be a function to override the default allDocs implementation
 exports.default = function (PouchDB) {
-  const baseAllDocs = PouchDB.prototype.allDocs;
+  var baseAllDocs = PouchDB.prototype.allDocs;
   // Add all functions to plugin that don't depend on `PouchDB` reference
-  for (const exportName in exports) {
+  for (var exportName in exports) {
     PouchDB.prototype[exportName] = exports[exportName];
   }
   // Wrap in another function to get correct `this`
-  PouchDB.prototype.allDocs = function(options, callback) { return allDocs.call(this, baseAllDocs, options, callback); }
-}
+  PouchDB.prototype.allDocs = function(options, callback) {
+    return allDocs.call(this, baseAllDocs, options, callback);
+  };
+};
 
 export default exports.default;
