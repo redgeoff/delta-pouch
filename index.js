@@ -140,7 +140,9 @@ function allDocs(baseFn, options, callback) {
 exports.all = function () {
   var db = this;
   return db.allDocs({include_docs: true}).then(function (doc) {
-    return doc.rows.map(function (el) { return el.doc; });
+    var docs = {};
+    doc.rows.forEach(function (el) { docs[el.doc.$id] = el.doc; });
+    return docs;
   });
 };
 
