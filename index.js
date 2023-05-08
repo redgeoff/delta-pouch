@@ -23,9 +23,8 @@ function notDefined(obj) {
   return typeof obj === 'undefined';
 }
 
-exports.delta = new events.EventEmitter();
-
 exports.deltaInit = function () {
+  this.delta = new events.EventEmitter();
 
   // TODO: remove as not needed anymore, right?
   // this.on('created', function (object) {
@@ -160,12 +159,12 @@ function onCreate(db, object) {
     if (!exports.wasDeleted(id)) { // not previously deleted?
       if (doc.$deleted) { // deleted?
         exports.markDeletion(id);
-        exports.delta.emit('delete', id);
+        db.delta.emit('delete', id);
       } else if (doc.$id) { // update?
-        exports.delta.emit('update', doc);
+        db.delta.emit('update', doc);
       } else {
         doc.$id = id;
-        exports.delta.emit('create', doc);
+        db.delta.emit('create', doc);
       }
     }
   });
