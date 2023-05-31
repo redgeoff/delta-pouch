@@ -23,9 +23,8 @@ function notDefined(obj) {
   return typeof obj === 'undefined';
 }
 
-exports.delta = new events.EventEmitter();
-
 exports.deltaInit = function () {
+  this.delta = new events.EventEmitter();
 
   // TODO: remove as not needed anymore, right?
   // this.on('created', function (object) {
@@ -41,6 +40,7 @@ exports.clone = function (obj) {
   return JSON.parse(JSON.stringify(obj));
 };
 
+/** Utility function. Equivalent to {...obj1, ...obj2} */
 exports.merge = function (obj1, obj2) {
   var merged = {};
   for (var i in obj1) {
@@ -50,6 +50,31 @@ exports.merge = function (obj1, obj2) {
     merged[i] = obj2[i];
   }
   return merged;
+};
+
+/**
+ * Utility function for merging many documents
+ * @param doc {{}[]} The documents to merge
+ */
+exports.mergeAll = function (doc) {
+  var docs = {},
+    deletions = {};
+  doc.forEach(function (el) {
+    if (!el.doc.$id) { // first delta for doc?
+      el.doc.$id = el.doc._id;
+    }
+    if (el.doc.$deleted) { // deleted?
+      delete(docs[el.doc.$id]);
+      deletions[el.doc.$id] = true;
+    } else if (!deletions[el.doc.$id]) { // update before any deletion?
+      if (docs[el.doc.$id]) { // exists?
+        docs[el.doc.$id].doc = exports.merge(docs[el.doc.$id].doc, el.doc);
+      } else {
+        docs[el.doc.$id] = el;
+      }
+    }
+  });
+  return Object.values(docs);
 };
 
 function save(db, doc) {
@@ -91,26 +116,29 @@ exports.delete = function (docOrId) {
   return save(this, {$id: id, $deleted: true});
 };
 
-exports.all = function () {
+function allDocs(baseFn, options, callback) {
+  // jshint validthis:true
   var db = this;
-  var docs = {},
-    deletions = {};
-  return db.allDocs({include_docs: true}).then(function (doc) {
-    doc.rows.forEach(function (el) {
-      if (!el.doc.$id) { // first delta for doc?
-        el.doc.$id = el.doc._id;
+  return new Promise(function (res, rej) {
+    baseFn.call(db, exports.merge(options, {include_docs: true}), function (err, resp) {
+      if (err) {
+        rej(err);
+      } else {
+        resp.rows = exports.mergeAll(resp.rows);
+        res(resp);
       }
-      if (el.doc.$deleted) { // deleted?
-        delete(docs[el.doc.$id]);
-        deletions[el.doc.$id] = true;
-      } else if (!deletions[el.doc.$id]) { // update before any deletion?
-        if (docs[el.doc.$id]) { // exists?
-          docs[el.doc.$id] = exports.merge(docs[el.doc.$id], el.doc);
-        } else {
-          docs[el.doc.$id] = el.doc;
-        }
+      if (typeof callback === "function") {
+        callback(err, resp);
       }
     });
+  });
+}
+
+exports.all = function () {
+  var db = this;
+  return db.allDocs({include_docs: true}).then(function (doc) {
+    var docs = {};
+    doc.rows.forEach(function (el) { docs[el.doc.$id] = el.doc; });
     return docs;
   });
 };
@@ -131,12 +159,12 @@ function onCreate(db, object) {
     if (!exports.wasDeleted(id)) { // not previously deleted?
       if (doc.$deleted) { // deleted?
         exports.markDeletion(id);
-        exports.delta.emit('delete', id);
+        db.delta.emit('delete', id);
       } else if (doc.$id) { // update?
-        exports.delta.emit('update', doc);
+        db.delta.emit('update', doc);
       } else {
         doc.$id = id;
-        exports.delta.emit('create', doc);
+        db.delta.emit('create', doc);
       }
     }
   });
@@ -262,3 +290,16 @@ exports.cleanup = function () {
 if (typeof window !== 'undefined' && window.PouchDB) {
   window.PouchDB.plugin(exports);
 }
+
+// This needs to be a function to override the default allDocs implementation
+exports.default = function (PouchDB) {
+  var baseAllDocs = PouchDB.prototype.allDocs;
+  // Add all functions to plugin that don't depend on `PouchDB` reference
+  for (var exportName in exports) {
+    PouchDB.prototype[exportName] = exports[exportName];
+  }
+  // Wrap in another function to get correct `this`
+  PouchDB.prototype.allDocs = function(options, callback) {
+    return allDocs.call(this, baseAllDocs, options, callback);
+  };
+};
